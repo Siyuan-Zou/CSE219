@@ -44,7 +44,7 @@ public class RandomStudentPicker extends Application {
     // THESE ARE OUR ONLY CONTROLS, A BUTTON AND A DISPLAY LABEL
     Button prevButton = new Button("Previous");
     Button pickButton = new Button("Random");
-    Button nextButton;
+    Button nextButton = new Button("Next");
     ArrayList<String> students = new ArrayList<>();
     final Label studentNameLabel = new Label();
     final ImageView studentImageView = new ImageView();
@@ -123,13 +123,15 @@ public class RandomStudentPicker extends Application {
 			for (int i = 0; i < maxCount; i++) {
 			    if (event.getSource() == prevButton)
 			    {
-				currentIndex += 1;
+				currentIndex -= 1;
 				if (currentIndex < 0)
 				    currentIndex = students.size() - 1;
 			    }
 			    else if (event.getSource() == nextButton)
 			    {
 				currentIndex += 1;
+                                if (currentIndex > students.size() - 1)
+				    currentIndex = 0;
 			    }
 			    else
 			    {
