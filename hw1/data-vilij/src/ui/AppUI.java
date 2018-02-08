@@ -5,7 +5,6 @@ import static java.io.File.separator;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.ToolBar;
 import javafx.stage.Stage;
 import vilij.propertymanager.PropertyManager;
 import static vilij.settings.PropertyTypes.GUI_RESOURCE_PATH;
@@ -62,7 +61,7 @@ public final class AppUI extends UITemplate {
         super.setToolBar(applicationTemplate);
         PropertyManager manager = applicationTemplate.manager;
         scrnshotButton = setToolbarButton(scrnshoticonPath, manager.getPropertyValue(SCREENSHOT_TOOLTIP.name()), true);
-        toolBar = new ToolBar(newButton, saveButton, loadButton, printButton, exitButton, scrnshotButton);
+        toolBar.getItems().add(scrnshotButton);
     }
 
     @Override
