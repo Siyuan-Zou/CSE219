@@ -1,12 +1,26 @@
 package ui;
 
 import actions.AppActions;
+import static java.io.File.separator;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.ToolBar;
 import javafx.stage.Stage;
+import vilij.propertymanager.PropertyManager;
+import static vilij.settings.PropertyTypes.GUI_RESOURCE_PATH;
+import static vilij.settings.PropertyTypes.ICONS_RESOURCE_PATH;
 import vilij.templates.ApplicationTemplate;
 import vilij.templates.UITemplate;
+import static settings.AppPropertyTypes.SCREENSHOT_ICON;
+import static settings.AppPropertyTypes.SCREENSHOT_TOOLTIP;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.layout.HBox;
+import javafx.geometry.Insets;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 
 /**
  * This is the application's user interface implementation.
@@ -20,6 +34,7 @@ public final class AppUI extends UITemplate {
 
     @SuppressWarnings("FieldCanBeLocal")
     private Button                       scrnshotButton; // toolbar button to take a screenshot of the data
+    private String                       scrnshoticonPath; // Added path for scrnshotButton 
     private ScatterChart<Number, Number> chart;          // the chart where data will be displayed
     private Button                       displayButton;  // workspace button to display data on the chart
     private TextArea                     textArea;       // text area for new data input
@@ -35,11 +50,19 @@ public final class AppUI extends UITemplate {
     @Override
     protected void setResourcePaths(ApplicationTemplate applicationTemplate) {
         super.setResourcePaths(applicationTemplate);
+        PropertyManager manager = applicationTemplate.manager;
+        String iconsPath = "/" + String.join(separator,
+                                             manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
+                                             manager.getPropertyValue(ICONS_RESOURCE_PATH.name()));
+        scrnshoticonPath = String.join(separator, iconsPath, manager.getPropertyValue(SCREENSHOT_ICON.name()));
     }
 
     @Override
     protected void setToolBar(ApplicationTemplate applicationTemplate) {
-        // TODO for homework 1
+        super.setToolBar(applicationTemplate);
+        PropertyManager manager = applicationTemplate.manager;
+        scrnshotButton = setToolbarButton(scrnshoticonPath, manager.getPropertyValue(SCREENSHOT_TOOLTIP.name()), true);
+        toolBar = new ToolBar(newButton, saveButton, loadButton, printButton, exitButton, scrnshotButton);
     }
 
     @Override
@@ -64,7 +87,25 @@ public final class AppUI extends UITemplate {
     }
 
     private void layout() {
-        // TODO for homework 1
+        textArea = new TextArea();
+        displayButton = new Button("Display");
+        Text dataTitle = new Text("Data File");
+        HBox visPane = new HBox();
+        VBox dataPane = new VBox();
+        dataPane.getChildren().addAll(dataTitle, textArea, displayButton);
+        dataTitle.setFont(new Font("Arial", 24));
+        dataPane.setMaxWidth(300.0);
+        dataPane.setMaxHeight(200.0);
+        dataPane.setPadding(new Insets(10, 10, 10, 10));
+        
+        NumberAxis xAxis = new NumberAxis();
+        NumberAxis yAxis = new NumberAxis();
+        chart = new ScatterChart<>(xAxis,yAxis);
+        chart.setPrefHeight(600);
+        chart.setPrefWidth(700);
+        chart.setTitle("Data Visualization");
+        visPane.getChildren().addAll(dataPane, chart);
+        appPane.getChildren().add(visPane);
     }
 
     private void setWorkspaceActions() {
