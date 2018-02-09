@@ -19,7 +19,9 @@ import javafx.scene.text.Text;
 import javafx.scene.layout.HBox;
 import javafx.geometry.Insets;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
+import dataprocessors.AppData;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This is the application's user interface implementation.
@@ -93,8 +95,8 @@ public final class AppUI extends UITemplate {
         VBox dataPane = new VBox();
         dataPane.getChildren().addAll(dataTitle, textArea, displayButton);
         dataTitle.setFont(new Font("Arial", 24));
-        dataPane.setMaxWidth(300.0);
-        dataPane.setMaxHeight(200.0);
+        dataPane.setMaxWidth(350.0);
+        dataPane.setMaxHeight(300.0);
         dataPane.setPadding(new Insets(10, 10, 10, 10));
         
         NumberAxis xAxis = new NumberAxis();
@@ -108,6 +110,13 @@ public final class AppUI extends UITemplate {
     }
 
     private void setWorkspaceActions() {
-        // TODO for homework 1
+        displayButton.setOnAction(e -> {
+            try {
+                ((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText());
+            } catch (Exception ex) {
+                Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
 }
+

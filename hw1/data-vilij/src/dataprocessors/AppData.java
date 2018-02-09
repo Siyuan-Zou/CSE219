@@ -27,8 +27,9 @@ public class AppData implements DataComponent {
         // TODO: NOT A PART OF HW 1
     }
 
-    public void loadData(String dataString) {
-        // TODO for homework 1
+    public void loadData(String dataString) throws Exception {
+        processor.processString(dataString);
+        this.displayData();
     }
 
     @Override
