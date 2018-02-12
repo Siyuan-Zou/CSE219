@@ -22,11 +22,26 @@ public class TTTButton extends Button {
         this.engine = engine;
         this.row = row;
         this.col = col;
-        // ???
+        this.setPrefWidth(PREF_SIZE);
+        this.setPrefHeight(PREF_SIZE);
+
+        this.setMaxWidth(Double.MAX_VALUE);
+        this.setMaxHeight(Double.MAX_VALUE);
+        this.setListener();
     }
 
     private void setListener() {
-        // ???
+        this.setOnAction(e -> {
+            try {
+                this.setText(engine.getPlayerToMove()
+                        == TTTEngine.X_PLAYER ? "X" : "O");
+                engine.makeMove(this.row, this.col);
+                if (engine.gameOver()) {
+                    this.gui.alertGameOver();
+                }
+            }catch(TTTEngine.IllegalMoveException x) {
+                this.gui.alertIllegalMove();
+            }
+        });
     }
-
 }

@@ -7,7 +7,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
 
 /**
@@ -33,7 +36,7 @@ public class TTTAppGUI extends Application {
 
         GridPane grid = new GridPane();
         mainPane.setCenter(grid);
-/*
+
         for (int i = 0; i < BOARD_DIM; i++) {
             RowConstraints rc = new RowConstraints();
             rc.setVgrow(Priority.ALWAYS);
@@ -44,16 +47,16 @@ public class TTTAppGUI extends Application {
             cc.setFillWidth(true);
             grid.getColumnConstraints().add(cc);
         }
-*/
+
         for (int i = 0; i < BOARD_DIM; i++) {
             for (int j = 0; j < BOARD_DIM; j++) {
                 Button btn = new Button("");
                 btn.setPrefWidth(BUTTON_SIZE);
                 btn.setPrefHeight(BUTTON_SIZE);
-/*
+
                 btn.setMaxWidth(Double.MAX_VALUE);
                 btn.setMaxHeight(Double.MAX_VALUE);
- */
+
                 final int ii = i;
                 final int jj = j;
                 btn.setOnAction(e -> {
