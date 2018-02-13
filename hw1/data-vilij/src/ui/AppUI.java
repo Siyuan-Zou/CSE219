@@ -22,6 +22,10 @@ import javafx.scene.chart.NumberAxis;
 import dataprocessors.AppData;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.value.ObservableValue;
+import static settings.AppPropertyTypes.CHART_TITLE;
+import static settings.AppPropertyTypes.DISPLAY_BUTTON;
+import static settings.AppPropertyTypes.DATA_TITLE;
 
 /**
  * This is the application's user interface implementation.
@@ -84,17 +88,19 @@ public final class AppUI extends UITemplate {
 
     @Override
     public void clear() {
-        // TODO for homework 1
+        textArea.clear();
+        chart.getData().clear();
     }
 
     private void layout() {
+        PropertyManager manager = applicationTemplate.manager;
         textArea = new TextArea();
-        displayButton = new Button("Display");
-        Text dataTitle = new Text("Data File");
+        displayButton = new Button(manager.getPropertyValue(DISPLAY_BUTTON.name()));
+        Text dataTitle = new Text(manager.getPropertyValue(DATA_TITLE.name()));
         HBox visPane = new HBox();
         VBox dataPane = new VBox();
         dataPane.getChildren().addAll(dataTitle, textArea, displayButton);
-        dataTitle.setFont(new Font("Arial", 24));
+        dataTitle.setFont(new Font(24));
         dataPane.setMaxWidth(350.0);
         dataPane.setMaxHeight(300.0);
         dataPane.setPadding(new Insets(10, 10, 10, 10));
@@ -104,7 +110,7 @@ public final class AppUI extends UITemplate {
         chart = new ScatterChart<>(xAxis,yAxis);
         chart.setPrefHeight(600);
         chart.setPrefWidth(700);
-        chart.setTitle("Data Visualization");
+        chart.setTitle(manager.getPropertyValue(CHART_TITLE.name()));
         visPane.getChildren().addAll(dataPane, chart);
         appPane.getChildren().add(visPane);
     }
@@ -116,6 +122,18 @@ public final class AppUI extends UITemplate {
             } catch (Exception ex) {
                 Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
             }
+        });
+        textArea.textProperty().addListener((ObservableValue<? extends String> ov, String t, String t1) -> {
+            if(t1.equals("")) {
+                newButton.setDisable(true);
+                saveButton.setDisable(true);
+            }
+            else {
+                newButton.setDisable(false);
+                saveButton.setDisable(false);
+            }
+            hasNewText = true;
+            ((AppData) applicationTemplate.getDataComponent()).clear();
         });
     }
 }

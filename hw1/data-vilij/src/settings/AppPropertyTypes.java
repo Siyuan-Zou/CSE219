@@ -31,5 +31,8 @@ public enum AppPropertyTypes {
     DATA_FILE_EXT,
     DATA_FILE_EXT_DESC,
     TEXT_AREA,
-    SPECIFIED_FILE
+    SPECIFIED_FILE,
+    CHART_TITLE,
+    DISPLAY_BUTTON,
+    DATA_TITLE
 }
