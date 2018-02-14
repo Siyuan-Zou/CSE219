@@ -11,6 +11,7 @@ public enum AppPropertyTypes {
 
     /* resource files and folders */
     DATA_RESOURCE_PATH,
+    EXTRA_DIRECTORY,
 
     /* user interface icon file names */
     SCREENSHOT_ICON,
@@ -34,5 +35,6 @@ public enum AppPropertyTypes {
     SPECIFIED_FILE,
     CHART_TITLE,
     DISPLAY_BUTTON,
-    DATA_TITLE
+    DATA_TITLE,
+    INITIAL_FILE_NAME
 }

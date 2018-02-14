@@ -11,8 +11,6 @@ import static vilij.settings.PropertyTypes.GUI_RESOURCE_PATH;
 import static vilij.settings.PropertyTypes.ICONS_RESOURCE_PATH;
 import vilij.templates.ApplicationTemplate;
 import vilij.templates.UITemplate;
-import static settings.AppPropertyTypes.SCREENSHOT_ICON;
-import static settings.AppPropertyTypes.SCREENSHOT_TOOLTIP;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -23,9 +21,7 @@ import dataprocessors.AppData;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.value.ObservableValue;
-import static settings.AppPropertyTypes.CHART_TITLE;
-import static settings.AppPropertyTypes.DISPLAY_BUTTON;
-import static settings.AppPropertyTypes.DATA_TITLE;
+import static settings.AppPropertyTypes.*;
 
 /**
  * This is the application's user interface implementation.
@@ -46,6 +42,7 @@ public final class AppUI extends UITemplate {
     private boolean                      hasNewText;     // whether or not the text area has any new data since last display
 
     public ScatterChart<Number, Number> getChart() { return chart; }
+    public TextArea getTextArea() { return textArea; }
 
     public AppUI(Stage primaryStage, ApplicationTemplate applicationTemplate) {
         super(primaryStage, applicationTemplate);

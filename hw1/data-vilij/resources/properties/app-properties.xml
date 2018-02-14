@@ -6,6 +6,7 @@ functionality within the main workspace. -->
     <property_list>
         <!-- RESOURCE FILES AND FOLDERS -->
         <property name="DATA_RESOURCE_PATH" value="data"/>
+        <property name="EXTRA_DIRECTORY" value="data-vilij\\resources\\"/>
 
         <!-- USER INTERFACE ICON FILES -->
         <property name="SCREENSHOT_ICON" value="screenshot.png"/>
@@ -27,13 +28,14 @@ functionality within the main workspace. -->
         <property name="SAVE_UNSAVED_WORK" value="Would you like to save current work?"/>
 
         <!-- APPLICATION-SPECIFIC PARAMETERS -->
-        <property name="DATA_FILE_EXT" value=".tsd"/>
-        <property name="DATA_FILE_EXT_DESC" value="Tab-Separated Data File"/>
+        <property name="DATA_FILE_EXT" value="*.tsd"/>
+        <property name="DATA_FILE_EXT_DESC" value="Tab-Separated Data File (*.tsd)"/>
         <property name="TEXT_AREA" value="text area"/>
         <property name="SPECIFIED_FILE" value=" specified file"/>
         <property name="CHART_TITLE" value="Data Visualization"/>
         <property name="DISPLAY_BUTTON" value="Display"/>
         <property name="DATA_TITLE" value="Data File"/>
+        <property name="INITIAL_FILE_NAME" value="Untilted"/>
 
     </property_list>
     <property_options_list/>
