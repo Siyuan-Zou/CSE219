@@ -116,7 +116,8 @@ public final class AppUI extends UITemplate {
             ((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText());
         });
         textArea.textProperty().addListener((ObservableValue<? extends String> ov, String t, String t1) -> {
-            if(t1.equals("")) {
+            hasNewText = true;
+            if(t1.equals("") && hasNewText) {
                 newButton.setDisable(true);
                 saveButton.setDisable(true);
             }
@@ -124,7 +125,6 @@ public final class AppUI extends UITemplate {
                 newButton.setDisable(false);
                 saveButton.setDisable(false);
             }
-            hasNewText = true;
             ((AppData) applicationTemplate.getDataComponent()).clear();
         });
     }
