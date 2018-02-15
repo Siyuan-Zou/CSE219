@@ -7,8 +7,6 @@ import vilij.templates.ApplicationTemplate;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import ui.AppUI;
 
@@ -19,6 +17,7 @@ import vilij.propertymanager.PropertyManager;
 
 import javafx.stage.FileChooser;
 import static settings.AppPropertyTypes.*;
+import vilij.components.ErrorDialog;
 /**
  * This is the concrete implementation of the action handlers required by the application.
  *
@@ -38,11 +37,12 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleNewRequest() {
+        PropertyManager manager = applicationTemplate.manager;
         try {
             if(promptToSave() == true)
                 ((AppUI) applicationTemplate.getUIComponent()).clear();
         } catch (IOException ex) {
-            Logger.getLogger(AppActions.class.getName()).log(Level.SEVERE, null, ex);
+            ((ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR)).show(manager.getPropertyValue(SAVE_ERROR_TITLE.name()), manager.getPropertyValue(RESOURCE_SUBDIR_NOT_FOUND.name()));
         }
     }
 
@@ -97,10 +97,12 @@ public final class AppActions implements ActionComponent {
             
             File file = fc.showSaveDialog(((AppUI)applicationTemplate.getUIComponent()).getPrimaryWindow());
             
-            FileWriter fw = new FileWriter(file);
-            fw.write(((AppUI)applicationTemplate.getUIComponent()).getTextArea().getText());
-            fw.close();
-            
+            try (FileWriter fw = new FileWriter(file)) {
+                fw.write(((AppUI)applicationTemplate.getUIComponent()).getTextArea().getText());
+                fw.close();
+            } catch (NullPointerException ex) {
+                ((ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR)).show(manager.getPropertyValue(SAVE_ERROR_TITLE.name()), manager.getPropertyValue(DATA_UNSAVED.name()));
+            }
             return true;
         }
         if(cdial.getSelectedOption().equals(Option.NO)) {

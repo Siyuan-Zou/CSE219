@@ -18,8 +18,6 @@ import javafx.scene.layout.HBox;
 import javafx.geometry.Insets;
 import javafx.scene.chart.NumberAxis;
 import dataprocessors.AppData;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.value.ObservableValue;
 import static settings.AppPropertyTypes.*;
 
@@ -114,11 +112,8 @@ public final class AppUI extends UITemplate {
 
     private void setWorkspaceActions() {
         displayButton.setOnAction(e -> {
-            try {
-                ((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText());
-            } catch (Exception ex) {
-                Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            chart.getData().clear();
+            ((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText());
         });
         textArea.textProperty().addListener((ObservableValue<? extends String> ov, String t, String t1) -> {
             if(t1.equals("")) {
