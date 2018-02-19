@@ -1,0 +1,20 @@
+/*
+    This Cascading Style Sheet provides all the style for
+    the Web page where we are rendering our Red Box Man.
+*/
+#content {
+    border:15px groove #73AD21;
+    padding:10px;
+}
+
+#page_header {
+    background-color: salmon;
+    color: white;
+    font-size: 36pt;
+    font-family: 'Permanent Marker', cursive;
+    text-align: center;
+}
+
+#red_box_man_canvas {
+    background-color: antiquewhite;
+}

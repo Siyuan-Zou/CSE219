@@ -1,0 +1,39 @@
+<!--
+    CSE 219 - Spring 2016
+    Recitation 4
+    Canvas rendering with HTML5 and JavaFX
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+	<title>Recitation 4 - HTML5 Rendering using canvas</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- SPECIFY THE STYLE SHEET -->
+	<link href='https://fonts.googleapis.com/css?family=Permanent+Marker' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" href="./css/RedBoxManLayout.css" />
+	<link rel="stylesheet" type="text/css" href="./css/RedBoxManStyle.css" />
+
+	<!-- AND THIS IS WHERE OUR JavaScript METHODS ARE -->
+	<script src="./js/RedBoxManRenderer.js"></script>
+	<!-- ONCE THIS PAGE FULLY LOADS INITIALIZE OUR GLOBAL JavaScript VARIABLES -->
+        <script>
+	    window.onload = function()
+	    {
+		init();
+	    }
+        </script>    
+    </head>
+    <body>
+	<div id="content">
+	    <div id='page_header' onclick="toggleMousePositionRendering()">
+		The Red Box Man<br />
+		RENDERER
+	    </div>
+	    <canvas width="800" height="600" id='red_box_man_canvas' onclick="processMouseClick(event)" onmousemove="updateMousePosition(event)">
+
+	    </canvas>
+	</div>
+    </body>
+</html>

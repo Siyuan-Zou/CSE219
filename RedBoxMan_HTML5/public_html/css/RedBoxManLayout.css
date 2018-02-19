@@ -1,0 +1,26 @@
+/*
+    This Cascading Style Sheet provides all the layout for
+    the Web page where we are rendering our Red Box Man.
+*/
+#content {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    width: 840px;
+    height: 560px;
+}
+
+#page_header {
+    position: relative;
+    left: 0px;
+    top: 0px;
+    height: 140px;
+}
+
+#red_box_man_canvas {
+    position: relative;
+    left: 0px;
+    top: 0px;
+    width: 840px;
+    height: 420px;
+}
