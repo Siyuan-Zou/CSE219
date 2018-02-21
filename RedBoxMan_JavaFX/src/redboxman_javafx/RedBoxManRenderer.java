@@ -90,6 +90,8 @@ public class RedBoxManRenderer extends Application {
     public void renderShapeRedBoxMan(Point2D location) {
 	String headColor = "#DD0000";
 	String outlineColor = "#000000";
+        String eyeColor = "#FFFF00";
+        String blackColor = "#000000";
 	int headW = 115;
 	int headH = 88;
     
@@ -100,8 +102,23 @@ public class RedBoxManRenderer extends Application {
 	gc.setStroke(Paint.valueOf(outlineColor));
 	gc.setLineWidth(1);
 	gc.rect(location.getX(), location.getY(), headW, headH);
-	gc.stroke();
-	
+        gc.stroke();
+        
+        gc.setFill(Paint.valueOf(eyeColor));
+        gc.fillRect(location.getX()+10, location.getY()+20, 40, 25);
+        gc.fillRect(location.getX()+70, location.getY()+20, 40, 25);
+        
+	gc.setFill(Paint.valueOf(blackColor));
+        gc.fillRect(location.getX()+25, location.getY()+30, 10, 10);
+        gc.fillRect(location.getX()+85, location.getY()+30, 10, 10);
+        
+        gc.fillRect(location.getX()+20, location.getY()+70, 80, 10);
+        gc.fillRect(location.getX()+28, location.getY()+88, 60, 30);
+        gc.fillRect(location.getX()+35, location.getY()+107, 45, 20);
+        
+        gc.fillRect(location.getX()+20, location.getY()+120, 15, 15);
+        gc.fillRect(location.getX()+80, location.getY()+120, 15, 15);
+        
 	// AND THEN DRAW THE REST OF HIM
     }
     
