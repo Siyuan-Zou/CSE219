@@ -100,6 +100,20 @@ function renderShapesRedBoxMan(location) {
     gc.rect(location.x, location.y, headW, headH);
     gc.stroke();
     
+    gc.fillStyle = eyeColor;
+    gc.fillRect(location.x+10, location.y+20, 40, 25);
+    gc.fillRect(location.x+70, location.y+20, 40, 25);
+    gc.fillStyle = blackColor;
+    gc.fillRect(location.x+25, location.y+30, 10, 10);
+    gc.fillRect(location.x+85, location.y+30, 10, 10);
+        
+    gc.fillRect(location.x+20, location.y+70, 80, 10);
+    gc.fillRect(location.x+28, location.y+88, 60, 30);
+    gc.fillRect(location.x+35, location.y+107, 45, 20);
+        
+    gc.fillRect(location.x+20, location.y+120, 15, 15);
+    gc.fillRect(location.x+80, location.y+120, 15, 15);
+    
     // AND THEN DRAW THE REST OF HIM
 }
 
