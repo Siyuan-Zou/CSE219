@@ -17,8 +17,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
-
-import static java.io.File.separator;
 import static vilij.settings.PropertyTypes.SAVE_WORK_TITLE;
 
 /**
@@ -106,19 +104,17 @@ public final class AppActions implements ActionComponent {
         if (dialog.getSelectedOption().equals(ConfirmationDialog.Option.YES)) {
             if (dataFilePath == null) {
                 FileChooser fileChooser = new FileChooser();
-                String      dataDirPath = separator + manager.getPropertyValue(AppPropertyTypes.DATA_RESOURCE_PATH.name());
-                URL         dataDirURL  = getClass().getResource(dataDirPath);
+                String      dataDirPath = manager.getPropertyValue(AppPropertyTypes.DATA_RESOURCE_PATH.name());
 
-                if (dataDirURL == null)
+                if (dataDirPath == null)
                     throw new FileNotFoundException(manager.getPropertyValue(AppPropertyTypes.RESOURCE_SUBDIR_NOT_FOUND.name()));
 
-                fileChooser.setInitialDirectory(new File(dataDirURL.getFile()));
+                fileChooser.setInitialDirectory(new File(dataDirPath));
                 fileChooser.setTitle(manager.getPropertyValue(SAVE_WORK_TITLE.name()));
 
                 String description = manager.getPropertyValue(AppPropertyTypes.DATA_FILE_EXT_DESC.name());
                 String extension   = manager.getPropertyValue(AppPropertyTypes.DATA_FILE_EXT.name());
-                ExtensionFilter extFilter = new ExtensionFilter(String.format("%s (.*%s)", description, extension),
-                                                                String.format("*.%s", extension));
+                ExtensionFilter extFilter = new ExtensionFilter(description, extension);
 
                 fileChooser.getExtensionFilters().add(extFilter);
                 File selected = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
