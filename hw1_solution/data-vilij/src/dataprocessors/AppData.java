@@ -1,5 +1,8 @@
 package dataprocessors;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import settings.AppPropertyTypes;
 import ui.AppUI;
 import vilij.components.DataComponent;
@@ -13,6 +16,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import javafx.geometry.Point2D;
+import javafx.scene.chart.XYChart;
 
 /**
  * This is the concrete application-specific implementation of the data component defined by the Vilij framework.
@@ -32,7 +38,41 @@ public class AppData implements DataComponent {
 
     @Override
     public void loadData(Path dataFilePath) {
-        // TODO: NOT A PART OF HW 1
+        PropertyManager manager = applicationTemplate.manager;
+        File file = new File(dataFilePath.toString());
+        String out1 ="";
+        String out2 ="";
+        int count=0;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String st ="";
+            while ((st = br.readLine()) != null){
+                if(count < 10)
+                    out1+=st+"\n";
+                else
+                    out2+=st+"\n";
+                count++;
+            }
+            processor.clear();
+            processor.processString(out1+out2);
+            ((AppUI) applicationTemplate.getUIComponent()).getTextArea().setText(out1);
+            ((AppUI) applicationTemplate.getUIComponent()).getHidden().setText(out2);
+            ErrorDialog     tdialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+            tdialog.show(manager.getPropertyValue(AppPropertyTypes.OPEN_WORK_TITLE.name()),  
+                    manager.getPropertyValue(AppPropertyTypes.LINE_COUNT.name())+count);
+        }catch (Exception e){
+            if(processor.getDupeLine() != -1){
+                ErrorDialog     ddialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+                ddialog.show(manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()),
+                        manager.getPropertyValue(AppPropertyTypes.DUPLICATE_AT.name())+ processor.getErrorLines().get(0));
+            }else{
+                if(!processor.getErrorLines().isEmpty()){
+                    ErrorDialog     edialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+                    edialog.show(manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()),
+                            manager.getPropertyValue(AppPropertyTypes.ERROR_AT.name())+ processor.getErrorLines().get(0));
+                }
+            }
+        }
     }
 
     public void loadData(String dataString) {
@@ -50,10 +90,9 @@ public class AppData implements DataComponent {
 
     @Override
     public void saveData(Path dataFilePath) {
-        // NOTE: completing this method was not a part of HW 1. You may have implemented file saving from the
-        // confirmation dialog elsewhere in a different way.
-        try (PrintWriter writer = new PrintWriter(Files.newOutputStream(dataFilePath))) {
-            writer.write(((AppUI) applicationTemplate.getUIComponent()).getCurrentText());
+        String currentText = ((AppUI) applicationTemplate.getUIComponent()).getCurrentText();
+        try(PrintWriter writer = new PrintWriter(Files.newOutputStream(dataFilePath))){
+            writer.write(currentText);
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
@@ -65,6 +104,36 @@ public class AppData implements DataComponent {
     }
 
     public void displayData() {
+        PropertyManager manager = applicationTemplate.manager;
         processor.toChartData(((AppUI) applicationTemplate.getUIComponent()).getChart());
+        processor.addTooltip(((AppUI) applicationTemplate.getUIComponent()).getChart());
+        if(!((AppUI) applicationTemplate.getUIComponent()).getChart().getData().isEmpty()){
+            Map<String, Point2D> points = processor.getDataPoints();
+            double sum = 0;
+            double lowestX = Double.MAX_VALUE;
+            double highestX = Double.NEGATIVE_INFINITY;
+            int count = 0;
+            for (Map.Entry<String, Point2D> entry : points.entrySet()) {
+                sum += entry.getValue().getY();
+                count++;
+            
+                if(entry.getValue().getX() > highestX)
+                    highestX = entry.getValue().getX();
+                if(entry.getValue().getX() < lowestX)
+                    lowestX = entry.getValue().getX();
+            }
+            double averageY = sum/count;
+            XYChart.Series line = new XYChart.Series();
+            line.setName(manager.getPropertyValue(AppPropertyTypes.AVERAGE.name()));
+            XYChart.Data p1 = new XYChart.Data(lowestX, averageY);
+            XYChart.Data p2 = new XYChart.Data(highestX, averageY);
+            line.getData().add(p1);
+            line.getData().add(p2);
+            ((AppUI) applicationTemplate.getUIComponent()).getChart().getData().add(line);
+        
+            p1.getNode().setId(manager.getPropertyValue(AppPropertyTypes.POINT.name()));
+            p2.getNode().setId(manager.getPropertyValue(AppPropertyTypes.POINT.name()));
+            line.getNode().setId(manager.getPropertyValue(AppPropertyTypes.AVERAGE.name()));
+        }
     }
 }

@@ -36,6 +36,18 @@ functionality within the main workspace. -->
         <property name="LEFT_PANE_TITLESIZE" value="18"/>
         <property name="CHART_TITLE" value="Data Visualization"/>
         <property name="DISPLAY_BUTTON_TEXT" value="Display Data"/>
+        <property name="CHECKBOX_NAME" value="Read Only"/>
+        <property name="CHART_STYLE_PATH" value="ChartStyle.css"/>
+        <property name="SAVE_OPTION" value="save"/>
+        <property name="OPEN_OPTION" value="open"/>
+        <property name="OPEN_WORK_TITLE" value="Opening File"/>
+        <property name="DUPLICATE_AT" value="Duplicate at line: "/>
+        <property name="ERROR_AT" value="Error at line: "/>
+        <property name="SAVE_IMAGE_TITLE" value="Save Image"/>
+        <property name="LINE_COUNT" value="Number of line(s) : "/>
+        <property name="AVERAGE" value="average"/>
+        <property name="POINT" value="point"/>
+        <property name="PNG_EXT" value="*.png"/>
 
     </property_list>
     <property_options_list/>
