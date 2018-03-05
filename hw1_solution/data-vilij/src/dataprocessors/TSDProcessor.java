@@ -108,6 +108,9 @@ public final class TSDProcessor {
     void clear() {
         dataPoints.clear();
         dataLabels.clear();
+        dupeLine = -1;
+        dupeName ="";
+        errorLines.clear(); 
     }
 
     private String checkedname(String name) throws InvalidDataNameException {
