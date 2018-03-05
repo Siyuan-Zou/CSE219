@@ -85,7 +85,7 @@ public final class AppActions implements ActionComponent {
             if(processor.getDupeLine() != -1){
                 ErrorDialog     ddialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
                 ddialog.show(manager.getPropertyValue(PropertyTypes.SAVE_ERROR_TITLE.name()), 
-                        manager.getPropertyValue(AppPropertyTypes.DUPLICATE_AT.name())+ processor.getErrorLines().get(0));
+                        manager.getPropertyValue(AppPropertyTypes.DUPLICATE_AT.name())+ processor.getErrorLines().get(0)+processor.getDupeName());
             }else{
                 if(!processor.getErrorLines().isEmpty()){
                     ErrorDialog     edialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
@@ -179,7 +179,7 @@ public final class AppActions implements ActionComponent {
                 if(processor.getDupeLine() != -1){
                     ErrorDialog     ddialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
                     ddialog.show(manager.getPropertyValue(PropertyTypes.SAVE_ERROR_TITLE.name()), 
-                            manager.getPropertyValue(AppPropertyTypes.DUPLICATE_AT.name())+ processor.getErrorLines().get(0));
+                            manager.getPropertyValue(AppPropertyTypes.DUPLICATE_AT.name())+ processor.getErrorLines().get(0)+processor.getDupeName());
                 }else{
                     if(!processor.getErrorLines().isEmpty()){
                         ErrorDialog     edialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);

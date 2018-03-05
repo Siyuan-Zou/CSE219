@@ -43,6 +43,7 @@ public final class TSDProcessor {
     private Map<String, Point2D> dataPoints;
     private ArrayList<Integer> errorLines = new ArrayList<Integer>();
     private int dupeLine = -1;
+    private String dupeName;
 
     public TSDProcessor() {
         dataLabels = new HashMap<>();
@@ -66,6 +67,7 @@ public final class TSDProcessor {
                     String   name  = checkedname(list.get(0));
                     int n = dupeLineNum.incrementAndGet();
                     if(checkDupe(name)){
+                        dupeName = name;
                         dupeLine = n;
                         throw new DupelicateException(n);
                     }
@@ -144,5 +146,8 @@ public final class TSDProcessor {
     }
     public int getDupeLine(){
         return dupeLine;
+    }
+    public String getDupeName(){
+        return dupeName;
     }
 }

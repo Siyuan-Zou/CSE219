@@ -64,7 +64,7 @@ public class AppData implements DataComponent {
             if(processor.getDupeLine() != -1){
                 ErrorDialog     ddialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
                 ddialog.show(manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()),
-                        manager.getPropertyValue(AppPropertyTypes.DUPLICATE_AT.name())+ processor.getErrorLines().get(0));
+                        manager.getPropertyValue(AppPropertyTypes.DUPLICATE_AT.name())+ processor.getErrorLines().get(0)+processor.getDupeName());
             }else{
                 if(!processor.getErrorLines().isEmpty()){
                     ErrorDialog     edialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
