@@ -77,6 +77,9 @@ public final class AppUI extends UITemplate {
                                           manager.getPropertyValue(AppPropertyTypes.SCREENSHOT_TOOLTIP.name()),
                                           true);
         toolBar.getItems().add(scrnshotButton);
+        newButton.setDisable(false);
+        saveButton.setDisable(false);
+        toolBar.getItems().remove(printButton);
     }
 
     @Override
@@ -122,6 +125,10 @@ public final class AppUI extends UITemplate {
         chart.setVerticalGridLinesVisible(false);
         chart.setHorizontalZeroLineVisible(false);
         chart.setVerticalZeroLineVisible(false);
+        chart.getXAxis().setTickLabelsVisible(false);
+        chart.getXAxis().setOpacity(0);
+        chart.getYAxis().setTickLabelsVisible(false);
+        chart.getYAxis().setOpacity(0);
 
         VBox leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
@@ -130,22 +137,23 @@ public final class AppUI extends UITemplate {
         leftPanel.setMaxSize(windowWidth * 0.29, windowHeight * 0.45);
         leftPanel.setMinSize(windowWidth * 0.29, windowHeight * 0.45);
 
-        Text   leftPanelTitle = new Text(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLE.name()));
-        String fontname       = manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLEFONT.name());
-        Double fontsize       = Double.parseDouble(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLESIZE.name()));
-        leftPanelTitle.setFont(Font.font(fontname, fontsize));
+//        Text   leftPanelTitle = new Text(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLE.name()));
+//        String fontname       = manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLEFONT.name());
+//        Double fontsize       = Double.parseDouble(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLESIZE.name()));
+//        leftPanelTitle.setFont(Font.font(fontname, fontsize));
 
-        textArea = new TextArea();
-        hidden = new TextArea();
-        readOnly = new CheckBox(manager.getPropertyValue(AppPropertyTypes.CHECKBOX_NAME.name()));
-
-        HBox processButtonsBox = new HBox();
-        displayButton = new Button(manager.getPropertyValue(AppPropertyTypes.DISPLAY_BUTTON_TEXT.name()));
-        
-        HBox.setHgrow(processButtonsBox, Priority.ALWAYS);
-        processButtonsBox.getChildren().add(displayButton);
-
-        leftPanel.getChildren().addAll(leftPanelTitle, textArea, processButtonsBox, readOnly);
+//        textArea = new TextArea();
+//        hidden = new TextArea();
+//        readOnly = new CheckBox(manager.getPropertyValue(AppPropertyTypes.CHECKBOX_NAME.name()));
+//
+//        HBox processButtonsBox = new HBox();
+//        displayButton = new Button(manager.getPropertyValue(AppPropertyTypes.DISPLAY_BUTTON_TEXT.name()));
+//        
+//        HBox.setHgrow(processButtonsBox, Priority.ALWAYS);
+//        processButtonsBox.getChildren().add(displayButton);
+//
+//        leftPanel.getChildren().addAll(leftPanelTitle, textArea, processButtonsBox, readOnly);\
+//        leftPanel.getChildren().addAll(leftPanelTitle);
 
         StackPane rightPanel = new StackPane(chart);
         rightPanel.setMaxSize(windowWidth * 0.69, windowHeight * 0.69);
@@ -160,13 +168,13 @@ public final class AppUI extends UITemplate {
     }
 
     private void setWorkspaceActions() {
-        setTextAreaActions();
-        setDisplayButtonActions();
-        readOnly.selectedProperty().addListener(new ChangeListener<Boolean>(){
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
-                textArea.setDisable(newValue);
-            }
-        });
+//        setTextAreaActions();
+//        setDisplayButtonActions();
+//        readOnly.selectedProperty().addListener(new ChangeListener<Boolean>(){
+//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
+//                textArea.setDisable(newValue);
+//            }
+//        });
     }
 
     private void setTextAreaActions() {
