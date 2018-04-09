@@ -55,11 +55,16 @@ public class AppData implements DataComponent {
             }
             processor.clear();
             processor.processString(out1+out2);
-            ((AppUI) applicationTemplate.getUIComponent()).getTextArea().setText(out1);
-            ((AppUI) applicationTemplate.getUIComponent()).getHidden().setText(out2);
-            ErrorDialog     tdialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
-            tdialog.show(manager.getPropertyValue(AppPropertyTypes.OPEN_WORK_TITLE.name()),  
-                    manager.getPropertyValue(AppPropertyTypes.LINE_COUNT.name())+count);
+            
+            AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
+            
+            ui.showData();
+            ui.showDetail(count, dataFilePath, processor.getDataLabels());
+            ui.showAlgorithmType();
+            
+            ui.getTextArea().setText(out1);
+            ui.getHidden().setText(out2);
+            
         }catch (Exception e){
             if(processor.getDupeLine() != -1){
                 ErrorDialog     ddialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);

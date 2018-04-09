@@ -121,6 +121,9 @@ public final class TSDProcessor {
     public Map<String, Point2D> getDataPoints(){
         return dataPoints;
     }
+    public Map<String, String> getDataLabels(){
+        return dataLabels;
+    }
     public void addTooltip(XYChart<Number, Number>chart){
         for(XYChart.Series<Number, Number> s : chart.getData()){
             for(XYChart.Data d : s.getData()){

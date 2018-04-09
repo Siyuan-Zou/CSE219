@@ -22,10 +22,13 @@ import vilij.templates.UITemplate;
 
 import static java.io.File.separator;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.CheckBox;
@@ -49,7 +52,9 @@ public final class AppUI extends UITemplate {
     private TextArea                     textArea;       // text area for new data input
     private TextArea                     hidden;       // text area for new data input
     private boolean                      hasNewText;     // whether or not the text area has any new data since last display
-    private CheckBox                     readOnly;
+    private VBox                         leftPanel;
+    
+    private boolean hasTwoLabels;
 
     public LineChart<Number, Number> getChart() { return chart; }
 
@@ -125,35 +130,15 @@ public final class AppUI extends UITemplate {
         chart.setVerticalGridLinesVisible(false);
         chart.setHorizontalZeroLineVisible(false);
         chart.setVerticalZeroLineVisible(false);
-        chart.getXAxis().setTickLabelsVisible(false);
         chart.getXAxis().setOpacity(0);
-        chart.getYAxis().setTickLabelsVisible(false);
         chart.getYAxis().setOpacity(0);
 
-        VBox leftPanel = new VBox(8);
+        leftPanel = new VBox(8);
         leftPanel.setPadding(new Insets(10));
 
         VBox.setVgrow(leftPanel, Priority.ALWAYS);
-        leftPanel.setMaxSize(windowWidth * 0.29, windowHeight * 0.45);
-        leftPanel.setMinSize(windowWidth * 0.29, windowHeight * 0.45);
-
-//        Text   leftPanelTitle = new Text(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLE.name()));
-//        String fontname       = manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLEFONT.name());
-//        Double fontsize       = Double.parseDouble(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLESIZE.name()));
-//        leftPanelTitle.setFont(Font.font(fontname, fontsize));
-
-//        textArea = new TextArea();
-//        hidden = new TextArea();
-//        readOnly = new CheckBox(manager.getPropertyValue(AppPropertyTypes.CHECKBOX_NAME.name()));
-//
-//        HBox processButtonsBox = new HBox();
-//        displayButton = new Button(manager.getPropertyValue(AppPropertyTypes.DISPLAY_BUTTON_TEXT.name()));
-//        
-//        HBox.setHgrow(processButtonsBox, Priority.ALWAYS);
-//        processButtonsBox.getChildren().add(displayButton);
-//
-//        leftPanel.getChildren().addAll(leftPanelTitle, textArea, processButtonsBox, readOnly);\
-//        leftPanel.getChildren().addAll(leftPanelTitle);
+        leftPanel.setMaxSize(windowWidth * 0.29, windowHeight * 0.85);
+        leftPanel.setMinSize(windowWidth * 0.29, windowHeight * 0.85);
 
         StackPane rightPanel = new StackPane(chart);
         rightPanel.setMaxSize(windowWidth * 0.69, windowHeight * 0.69);
@@ -165,6 +150,53 @@ public final class AppUI extends UITemplate {
         
         appPane.getChildren().add(workspace);
         VBox.setVgrow(appPane, Priority.ALWAYS);
+    }
+    public void showData(){
+        PropertyManager manager = applicationTemplate.manager;
+        saveButton.setDisable(true);
+        leftPanel.getChildren().clear();
+        Text   leftPanelTitle = new Text(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLE.name()));
+        String fontname       = manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLEFONT.name());
+        Double fontsize       = Double.parseDouble(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLESIZE.name()));
+        leftPanelTitle.setFont(Font.font(fontname, fontsize));
+        
+        textArea = new TextArea();
+        textArea.setDisable(true);
+        hidden = new TextArea();
+        
+        leftPanel.getChildren().addAll(leftPanelTitle, textArea);
+    }
+    public void showDetail(int lineCount, Path dataFilePath, Map<String, String> labels){
+        PropertyManager manager = applicationTemplate.manager;
+        String s ="";
+        int countLabel = 0;
+        for (Map.Entry<String, String> entry : labels.entrySet()) {
+            if(!s.contains(entry.getValue())){
+                s+="-"+entry.getValue()+"\n";
+                countLabel++;
+            }
+        }
+        if(countLabel < 2)
+            hasTwoLabels = false;
+        
+        Text dataDetail = new Text("There are "+lineCount + " instances with " + labels.size() + " label(s) loaded from: " +
+                dataFilePath.toString() + "\n\n The Label(s) are: \n"+ s);
+        String fontname       = manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLEFONT.name());
+        Double fontsize       = Double.parseDouble(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLESIZE.name()))-3;
+        dataDetail.setFont(Font.font(fontname, fontsize));
+        
+        leftPanel.getChildren().add(dataDetail);
+        dataDetail.wrappingWidthProperty().bind(leftPanel.widthProperty());
+    }
+    public void showAlgorithmType(){
+        PropertyManager manager = applicationTemplate.manager;
+        Text algoTitle = new Text("Algorithm Types:");
+        
+        Button classification = new Button("Classification");
+        Button clustering = new Button("Clustering");
+        leftPanel.getChildren().addAll(algoTitle, classification, clustering);
+        if(hasTwoLabels == false)
+            classification.setDisable(true);
     }
 
     private void setWorkspaceActions() {
