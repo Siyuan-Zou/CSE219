@@ -51,6 +51,7 @@ public final class AppActions implements ActionComponent {
     @Override
     public void handleNewRequest() {
         PropertyManager manager = applicationTemplate.manager;
+        dataFilePath = null;
         AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
         ui.showData();
         ui.getTextArea().setDisable(false);
@@ -113,6 +114,8 @@ public final class AppActions implements ActionComponent {
             if (selected != null) {
                 dataFilePath = selected.toPath();
                 load();
+                AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
+                ui.getSaveButton().setDisable(true);
             }
         } catch (IOException ex){errorHandlingHelper();}
     }

@@ -170,6 +170,7 @@ public final class AppUI extends UITemplate {
         hidden = new TextArea();
         
         leftPanel.getChildren().addAll(leftPanelTitle, textArea);
+        setTextAreaActions();
     }
     public void showToggle(){
         PropertyManager manager = applicationTemplate.manager;
@@ -255,23 +256,8 @@ public final class AppUI extends UITemplate {
         textArea.textProperty().addListener((observable, oldValue, newValue) -> {
         try {
             if (!newValue.equals(oldValue)) {
-//                String s ="";
-//                int move = 10-newValue.split("\n").length;
-//                ArrayList<String> hiddenStringList = new ArrayList<String>(Arrays.asList(hidden.getText().split("\n")));
-//                if(move>0&&(hiddenStringList.size()>0)&&!hidden.getText().isEmpty()){
-//                    for(int i = 0; i<move; i++){
-//                        if(hiddenStringList.size()>0)
-//                            s+=hiddenStringList.remove(0)+"\n";
-//                    }
-//                    String t ="";
-//                    while(hiddenStringList.size()>0){
-//                        t += hiddenStringList.remove(0)+"\n";
-//                    }
-//                    hidden.setText(t);
-//                }
-//                textArea.setText(textArea.getText()+s);
                 if (!newValue.isEmpty()) {
-                    //((AppActions) applicationTemplate.getActionComponent()).setIsUnsavedProperty(true);
+                    ((AppActions) applicationTemplate.getActionComponent()).setIsUnsavedProperty(true);
                     if (newValue.charAt(newValue.length() - 1) == '\n')
                         hasNewText = true;
                         //newButton.setDisable(false);
