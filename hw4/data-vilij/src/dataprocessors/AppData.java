@@ -59,7 +59,7 @@ public class AppData implements DataComponent {
             AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
             
             ui.showData();
-            ui.showDetail(count, dataFilePath, processor.getDataLabels());
+            ui.showDetail(count, dataFilePath.toString(), processor.getDataLabels());
             ui.showAlgorithmType();
             
             ui.getTextArea().setText(out1);
@@ -81,15 +81,23 @@ public class AppData implements DataComponent {
     }
 
     public void loadData(String dataString) {
+        PropertyManager manager = applicationTemplate.manager;
         try {
             processor.processString(dataString);
         } catch (Exception e) {
-            ErrorDialog     dialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
-            PropertyManager manager  = applicationTemplate.manager;
-            String          errTitle = manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name());
-            String          errMsg   = manager.getPropertyValue(PropertyTypes.LOAD_ERROR_MSG.name());
-            String          errInput = manager.getPropertyValue(AppPropertyTypes.TEXT_AREA.name());
-            dialog.show(errTitle, errMsg + errInput);
+            if(processor.getDupeLine() != -1){
+                ErrorDialog     ddialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+                ddialog.show(manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()),
+                        manager.getPropertyValue(AppPropertyTypes.DUPLICATE_AT.name())+ processor.getErrorLines().get(0)+processor.getDupeName());
+                ((AppUI) applicationTemplate.getUIComponent()).setInvalidProperty(true);
+            }else{
+                if(!processor.getErrorLines().isEmpty()){
+                    ErrorDialog     edialog   = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+                    edialog.show(manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()),
+                            manager.getPropertyValue(AppPropertyTypes.ERROR_AT.name())+ processor.getErrorLines().get(0));
+                    ((AppUI) applicationTemplate.getUIComponent()).setInvalidProperty(true);
+                }
+            }
         }
     }
 
@@ -140,5 +148,8 @@ public class AppData implements DataComponent {
             p2.getNode().setId(manager.getPropertyValue(AppPropertyTypes.POINT.name()));
             line.getNode().setId(manager.getPropertyValue(AppPropertyTypes.AVERAGE.name()));
         }
+    }
+    public Map<String, String> getLabels(){
+        return processor.getDataLabels();
     }
 }

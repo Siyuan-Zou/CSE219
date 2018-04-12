@@ -50,15 +50,23 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleNewRequest() {
-        try {
-            if (!isUnsaved.get() || promptToSave()) {
-                applicationTemplate.getDataComponent().clear();
-                applicationTemplate.getUIComponent().clear();
-                ((AppUI) applicationTemplate.getUIComponent()).getScreenShotButton().setDisable(true);
-                isUnsaved.set(false);
-                dataFilePath = null;
-            }
-        }catch (Exception e){}
+        PropertyManager manager = applicationTemplate.manager;
+        AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
+        ui.showData();
+        ui.getTextArea().setDisable(false);
+        ui.showToggle();
+        
+        
+        
+//        try {
+//            if (!isUnsaved.get() || promptToSave()) {
+//                applicationTemplate.getDataComponent().clear();
+//                applicationTemplate.getUIComponent().clear();
+//                ((AppUI) applicationTemplate.getUIComponent()).getScreenShotButton().setDisable(true);
+//                isUnsaved.set(false);
+//                dataFilePath = null;
+//            }
+//        }catch (Exception e){}
     }
 
     @Override

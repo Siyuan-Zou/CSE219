@@ -32,6 +32,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ToggleButton;
 import static vilij.settings.PropertyTypes.GUI_RESOURCE_PATH;
 import static vilij.settings.PropertyTypes.ICONS_RESOURCE_PATH;
 
@@ -53,8 +54,12 @@ public final class AppUI extends UITemplate {
     private TextArea                     hidden;       // text area for new data input
     private boolean                      hasNewText;     // whether or not the text area has any new data since last display
     private VBox                         leftPanel;
+    private VBox                         algorithmTypePanel;
+    private Button                       toggle;
+    private boolean                      invalid; 
+    private Text                         dataDetail;
     
-    private boolean hasTwoLabels;
+    private boolean hasTwoLabels = true;
 
     public LineChart<Number, Number> getChart() { return chart; }
 
@@ -166,7 +171,14 @@ public final class AppUI extends UITemplate {
         
         leftPanel.getChildren().addAll(leftPanelTitle, textArea);
     }
-    public void showDetail(int lineCount, Path dataFilePath, Map<String, String> labels){
+    public void showToggle(){
+        PropertyManager manager = applicationTemplate.manager;
+        toggle = new Button("Done");
+        
+        leftPanel.getChildren().addAll(toggle);
+        setToggleButtonActions();
+    }
+    public void showDetail(int lineCount, String dataFilePath, Map<String, String> labels){
         PropertyManager manager = applicationTemplate.manager;
         String s ="";
         int countLabel = 0;
@@ -179,8 +191,8 @@ public final class AppUI extends UITemplate {
         if(countLabel < 2)
             hasTwoLabels = false;
         
-        Text dataDetail = new Text("There are "+lineCount + " instances with " + labels.size() + " label(s) loaded from: " +
-                dataFilePath.toString() + "\n\n The Label(s) are: \n"+ s);
+        dataDetail = new Text("There are "+lineCount + " instances with " + labels.size() + " label(s) loaded from: " +
+                dataFilePath + "\n\n The Label(s) are: \n"+ s);
         String fontname       = manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLEFONT.name());
         Double fontsize       = Double.parseDouble(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLESIZE.name()))-3;
         dataDetail.setFont(Font.font(fontname, fontsize));
@@ -188,15 +200,23 @@ public final class AppUI extends UITemplate {
         leftPanel.getChildren().add(dataDetail);
         dataDetail.wrappingWidthProperty().bind(leftPanel.widthProperty());
     }
+    public void clearDetail(){
+        leftPanel.getChildren().remove(dataDetail);
+    }
     public void showAlgorithmType(){
         PropertyManager manager = applicationTemplate.manager;
+        algorithmTypePanel = new VBox();
         Text algoTitle = new Text("Algorithm Types:");
         
         Button classification = new Button("Classification");
         Button clustering = new Button("Clustering");
-        leftPanel.getChildren().addAll(algoTitle, classification, clustering);
+        algorithmTypePanel.getChildren().addAll(algoTitle, classification, clustering);
+        leftPanel.getChildren().add(algorithmTypePanel);
         if(hasTwoLabels == false)
             classification.setDisable(true);
+    }
+    public void clearAlgorithmType(){
+        leftPanel.getChildren().remove(algorithmTypePanel);
     }
 
     private void setWorkspaceActions() {
@@ -208,35 +228,57 @@ public final class AppUI extends UITemplate {
 //            }
 //        });
     }
-
+    private void setToggleButtonActions(){
+        toggle.setOnAction(e -> {
+            invalid = false;
+            if(toggle.getText().equals("Done")){
+                AppData dataComponent = (AppData) applicationTemplate.getDataComponent();
+                dataComponent.clear();
+                dataComponent.loadData(textArea.getText());
+                if(!invalid){    
+                    toggle.setText("Edit");
+                    textArea.setDisable(true);
+                    showDetail(getLineCount(), "User Input of Text Area", dataComponent.getLabels());
+                    showAlgorithmType();
+                }
+            }
+            else{
+                toggle.setText("Done");
+                textArea.setDisable(false);
+                clearDetail();
+                clearAlgorithmType();
+            }
+                
+        });
+    }
     private void setTextAreaActions() {
         textArea.textProperty().addListener((observable, oldValue, newValue) -> {
         try {
             if (!newValue.equals(oldValue)) {
-                String s ="";
-                int move = 10-newValue.split("\n").length;
-                ArrayList<String> hiddenStringList = new ArrayList<String>(Arrays.asList(hidden.getText().split("\n")));
-                if(move>0&&(hiddenStringList.size()>0)&&!hidden.getText().isEmpty()){
-                    for(int i = 0; i<move; i++){
-                        if(hiddenStringList.size()>0)
-                            s+=hiddenStringList.remove(0)+"\n";
-                    }
-                    String t ="";
-                    while(hiddenStringList.size()>0){
-                        t += hiddenStringList.remove(0)+"\n";
-                    }
-                    hidden.setText(t);
-                }
-                textArea.setText(textArea.getText()+s);
+//                String s ="";
+//                int move = 10-newValue.split("\n").length;
+//                ArrayList<String> hiddenStringList = new ArrayList<String>(Arrays.asList(hidden.getText().split("\n")));
+//                if(move>0&&(hiddenStringList.size()>0)&&!hidden.getText().isEmpty()){
+//                    for(int i = 0; i<move; i++){
+//                        if(hiddenStringList.size()>0)
+//                            s+=hiddenStringList.remove(0)+"\n";
+//                    }
+//                    String t ="";
+//                    while(hiddenStringList.size()>0){
+//                        t += hiddenStringList.remove(0)+"\n";
+//                    }
+//                    hidden.setText(t);
+//                }
+//                textArea.setText(textArea.getText()+s);
                 if (!newValue.isEmpty()) {
-                    ((AppActions) applicationTemplate.getActionComponent()).setIsUnsavedProperty(true);
+                    //((AppActions) applicationTemplate.getActionComponent()).setIsUnsavedProperty(true);
                     if (newValue.charAt(newValue.length() - 1) == '\n')
                         hasNewText = true;
-                        newButton.setDisable(false);
+                        //newButton.setDisable(false);
                         saveButton.setDisable(false);
                     } else {
                         hasNewText = true;
-                        newButton.setDisable(true);
+                        //newButton.setDisable(true);
                         saveButton.setDisable(true);
                     }
             }
@@ -274,5 +316,11 @@ public final class AppUI extends UITemplate {
     }
     public TextArea getHidden(){
         return hidden;
+    }
+    public void setInvalidProperty(boolean b){
+        invalid = b;
+    }
+    public int getLineCount(){
+        return textArea.getText().split("\n").length;
     }
 }
