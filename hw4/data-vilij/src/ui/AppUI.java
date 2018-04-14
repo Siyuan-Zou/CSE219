@@ -32,7 +32,11 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import static vilij.settings.PropertyTypes.GUI_RESOURCE_PATH;
 import static vilij.settings.PropertyTypes.ICONS_RESOURCE_PATH;
 
@@ -59,7 +63,10 @@ public final class AppUI extends UITemplate {
     private boolean                      invalid; 
     private Text                         dataDetail;
     
-    private boolean hasTwoLabels = true;
+    private boolean                      hasTwoLabels;
+    private Button                       classification;
+    private Button                       clustering;
+    private Button                       runBtn;
 
     public LineChart<Number, Number> getChart() { return chart; }
 
@@ -181,12 +188,14 @@ public final class AppUI extends UITemplate {
     }
     public void showDetail(int lineCount, String dataFilePath, Map<String, String> labels){
         PropertyManager manager = applicationTemplate.manager;
+        hasTwoLabels = true;
         String s ="";
         int countLabel = 0;
         for (Map.Entry<String, String> entry : labels.entrySet()) {
             if(!s.contains(entry.getValue())){
                 s+="-"+entry.getValue()+"\n";
-                countLabel++;
+                if(!entry.getValue().equals("null"))
+                    countLabel++;
             }
         }
         if(countLabel < 2)
@@ -209,15 +218,78 @@ public final class AppUI extends UITemplate {
         algorithmTypePanel = new VBox();
         Text algoTitle = new Text("Algorithm Types:");
         
-        Button classification = new Button("Classification");
-        Button clustering = new Button("Clustering");
+        classification = new Button("Classification");
+        clustering = new Button("Clustering");
         algorithmTypePanel.getChildren().addAll(algoTitle, classification, clustering);
         leftPanel.getChildren().add(algorithmTypePanel);
         if(hasTwoLabels == false)
             classification.setDisable(true);
+        setClassificationActions();
+        setClusteringActions();
     }
     public void clearAlgorithmType(){
         leftPanel.getChildren().remove(algorithmTypePanel);
+    }
+    public void showClassAlgorithm(){
+        PropertyManager manager = applicationTemplate.manager;
+        clearAlgorithmType();
+        HBox classificationPane = new HBox();
+        classificationPane.setSpacing(10);
+        RadioButton rb1 = new RadioButton();
+        rb1.setText("Random Classification");
+        
+        String iconsPath = "/" + String.join(separator,
+                                             manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
+                                             manager.getPropertyValue(ICONS_RESOURCE_PATH.name()));
+        
+        Image configIcon = new Image(iconsPath+"/config.png", 20, 20, true, true);
+        ImageView configBtn = new ImageView(configIcon);
+        
+        classificationPane.getChildren().addAll(rb1, configBtn);
+        leftPanel.getChildren().add(classificationPane);
+        configBtn.setOnMouseClicked(e-> {
+            ConfigWindow classificationConfig = new ConfigWindow();
+            classificationConfig.show("Random Classification Config");
+        });
+        showRunButton();
+        rb1.selectedProperty().addListener(new ChangeListener<Boolean>(){
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
+                runBtn.setVisible(newValue);
+            }
+        });
+    }
+    public void showClusAlgorithm(){
+        PropertyManager manager = applicationTemplate.manager;
+        clearAlgorithmType();
+        HBox clusteringPane = new HBox();
+        clusteringPane.setSpacing(10);
+        RadioButton rb1 = new RadioButton();
+        rb1.setText("Random Clustering");
+        
+        String iconsPath = "/" + String.join(separator,
+                                             manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
+                                             manager.getPropertyValue(ICONS_RESOURCE_PATH.name()));
+        
+        Image configIcon = new Image(iconsPath+"/config.png", 20, 20, true, true);
+        ImageView configBtn = new ImageView(configIcon);
+        
+        clusteringPane.getChildren().addAll(rb1, configBtn);
+        leftPanel.getChildren().add(clusteringPane);
+        configBtn.setOnMouseClicked(e-> {
+            ConfigWindow clusterConfig = new ConfigWindow();
+            clusterConfig.show("Random Clustering Config");
+        });
+        showRunButton();
+        rb1.selectedProperty().addListener(new ChangeListener<Boolean>(){
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
+                runBtn.setVisible(newValue);
+            }
+        });
+    }
+    public void showRunButton(){
+        runBtn = new Button("Run");
+        runBtn.setVisible(false);
+        leftPanel.getChildren().add(runBtn);
     }
 
     private void setWorkspaceActions() {
@@ -260,11 +332,9 @@ public final class AppUI extends UITemplate {
                     ((AppActions) applicationTemplate.getActionComponent()).setIsUnsavedProperty(true);
                     if (newValue.charAt(newValue.length() - 1) == '\n')
                         hasNewText = true;
-                        //newButton.setDisable(false);
                         saveButton.setDisable(false);
                     } else {
                         hasNewText = true;
-                        //newButton.setDisable(true);
                         saveButton.setDisable(true);
                     }
             }
@@ -273,22 +343,14 @@ public final class AppUI extends UITemplate {
         }
         });
     }
-
-    private void setDisplayButtonActions() {
-        displayButton.setOnAction(event -> {
-            if (hasNewText) {
-                try {
-                    chart.getData().clear();
-                    AppData dataComponent = (AppData) applicationTemplate.getDataComponent();
-                    dataComponent.clear();
-                    dataComponent.loadData(textArea.getText()+hidden.getText());
-                    dataComponent.displayData();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            if(!chart.getData().isEmpty())
-                scrnshotButton.setDisable(false);
-            }
+    private void setClassificationActions(){
+        classification.setOnAction(e -> {
+            showClassAlgorithm();
+        });
+    }
+    private void setClusteringActions(){
+        clustering.setOnAction(e -> {
+            showClusAlgorithm();
         });
     }
     public Button getSaveButton(){
