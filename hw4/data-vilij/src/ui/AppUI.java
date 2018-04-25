@@ -37,6 +37,8 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import vilij.components.Dialog;
+import vilij.components.ErrorDialog;
 import static vilij.settings.PropertyTypes.GUI_RESOURCE_PATH;
 import static vilij.settings.PropertyTypes.ICONS_RESOURCE_PATH;
 
@@ -53,10 +55,8 @@ public final class AppUI extends UITemplate {
     @SuppressWarnings("FieldCanBeLocal")
     private Button                       scrnshotButton; // toolbar button to take a screenshot of the data
     private LineChart<Number, Number>    chart;          // the chart where data will be displayed
-    private Button                       displayButton;  // workspace button to display data on the chart
     private TextArea                     textArea;       // text area for new data input
     private TextArea                     hidden;       // text area for new data input
-    private boolean                      hasNewText;     // whether or not the text area has any new data since last display
     private VBox                         leftPanel;
     private VBox                         algorithmTypePanel;
     private Button                       toggle;
@@ -67,6 +67,13 @@ public final class AppUI extends UITemplate {
     private Button                       classification;
     private Button                       clustering;
     private Button                       runBtn;
+    
+    private boolean                      hasInitialized;
+    private boolean                      hasInitialClasConfig;
+    private boolean                      hasInitialClusConfig;
+    
+    private HBox clusteringPane;
+    private HBox classificationPane;
 
     public LineChart<Number, Number> getChart() { return chart; }
 
@@ -233,7 +240,7 @@ public final class AppUI extends UITemplate {
     public void showClassAlgorithm(){
         PropertyManager manager = applicationTemplate.manager;
         clearAlgorithmType();
-        HBox classificationPane = new HBox();
+        classificationPane = new HBox();
         classificationPane.setSpacing(10);
         RadioButton rb1 = new RadioButton();
         rb1.setText("Random Classification");
@@ -247,21 +254,28 @@ public final class AppUI extends UITemplate {
         
         classificationPane.getChildren().addAll(rb1, configBtn);
         leftPanel.getChildren().add(classificationPane);
+        ConfigWindow classificationConfig  = ConfigWindow.getDialog();
+        if(hasInitialized == false){
+            classificationConfig.init(primaryStage);
+            hasInitialized = true;
+        }
+        classificationConfig.hideCluster(true);
         configBtn.setOnMouseClicked(e-> {
-            ConfigWindow classificationConfig = new ConfigWindow();
-            classificationConfig.show("Random Classification Config");
+            hasInitialClasConfig = true;
+            classificationConfig.show("Config Window", "Classification Config");
         });
         showRunButton();
         rb1.selectedProperty().addListener(new ChangeListener<Boolean>(){
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
-                runBtn.setVisible(newValue);
+                if(hasInitialClasConfig == true)
+                    runBtn.setVisible(newValue);
             }
         });
     }
     public void showClusAlgorithm(){
         PropertyManager manager = applicationTemplate.manager;
         clearAlgorithmType();
-        HBox clusteringPane = new HBox();
+        clusteringPane = new HBox();
         clusteringPane.setSpacing(10);
         RadioButton rb1 = new RadioButton();
         rb1.setText("Random Clustering");
@@ -275,21 +289,36 @@ public final class AppUI extends UITemplate {
         
         clusteringPane.getChildren().addAll(rb1, configBtn);
         leftPanel.getChildren().add(clusteringPane);
+        
+        ConfigWindow clusterConfig = ConfigWindow.getDialog();
+        if(hasInitialized == false){
+            clusterConfig.init(primaryStage);
+            hasInitialized = true;
+        }
+        clusterConfig.hideCluster(false);
         configBtn.setOnMouseClicked(e-> {
-            ConfigWindow clusterConfig = new ConfigWindow();
-            clusterConfig.show("Random Clustering Config");
+            hasInitialClusConfig = true;
+            clusterConfig.show("Config Window", "Clustering Config");
         });
         showRunButton();
         rb1.selectedProperty().addListener(new ChangeListener<Boolean>(){
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
-                runBtn.setVisible(newValue);
+                if(hasInitialClusConfig == true)
+                    runBtn.setVisible(newValue);
             }
         });
+    }
+    public void clearAlgorithm(){
+        leftPanel.getChildren().remove(classificationPane);
+        leftPanel.getChildren().remove(clusteringPane);
     }
     public void showRunButton(){
         runBtn = new Button("Run");
         runBtn.setVisible(false);
         leftPanel.getChildren().add(runBtn);
+    }
+    public void clearRunButton(){
+        leftPanel.getChildren().remove(runBtn);
     }
 
     private void setWorkspaceActions() {
@@ -320,6 +349,8 @@ public final class AppUI extends UITemplate {
                 textArea.setDisable(false);
                 clearDetail();
                 clearAlgorithmType();
+                clearAlgorithm();
+                clearRunButton();
             }
                 
         });
@@ -331,10 +362,8 @@ public final class AppUI extends UITemplate {
                 if (!newValue.isEmpty()) {
                     ((AppActions) applicationTemplate.getActionComponent()).setIsUnsavedProperty(true);
                     if (newValue.charAt(newValue.length() - 1) == '\n')
-                        hasNewText = true;
                         saveButton.setDisable(false);
                     } else {
-                        hasNewText = true;
                         saveButton.setDisable(true);
                     }
             }
