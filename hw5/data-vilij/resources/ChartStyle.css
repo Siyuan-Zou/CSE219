@@ -1,0 +1,58 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Mar 2, 2018, 3:53:38 PM
+    Author     : Spirors
+*/
+
+.chart-series-line {    
+    -fx-stroke: transparent;
+}
+#ClassifierLine {
+    -fx-stroke: blue;
+}
+#point {
+    -fx-background-color: transparent;
+}
+.chart-plot-background {
+    -fx-border-color: black; 
+    -fx-border-style: solid; 
+    -fx-border-width: 5px;
+}
+.axis {
+    -fx-tick-length: 20;
+    -fx-minor-tick-length: 10;
+}
+.axis-tick-mark {
+    -fx-stroke: green;
+    -fx-stroke-width: 3px;
+}
+.axis-minor-tick-mark {
+    -fx-stroke: black;
+}
+.axis:top {
+    -fx-border-color: transparent;
+}
+
+.axis:right {
+    -fx-border-color: transparent;
+}
+
+.axis:bottom {
+    -fx-border-color: transparent;
+}
+
+.axis:left {
+    -fx-border-color: transparent;
+}
+
+.chart-vertical-grid-lines {
+    -fx-stroke: transparent;
+}
+
+.chart-horizontal-grid-lines {
+    -fx-stroke: transparent;
+}
