@@ -69,6 +69,10 @@ public final class AppUI extends UITemplate {
     private HBox clusteringPane;
     private HBox classificationPane;
     
+    private RandomClassifier rc;
+    
+    private boolean active = false;
+    
     private ArrayList<Integer> classifierConfigInputs;
 
     public LineChart<Number, Number> getChart() { return chart; }
@@ -141,8 +145,6 @@ public final class AppUI extends UITemplate {
         chart = new LineChart<>(xAxis, yAxis);
         chart.setTitle(manager.getPropertyValue(AppPropertyTypes.CHART_TITLE.name()));
         chart.getStylesheets().add(manager.getPropertyValue(AppPropertyTypes.CHART_STYLE_PATH.name()));
-        chart.setHorizontalZeroLineVisible(false);
-        chart.setVerticalZeroLineVisible(false);
         chart.getXAxis().setOpacity(0);
         chart.getYAxis().setOpacity(0);
 
@@ -340,10 +342,32 @@ public final class AppUI extends UITemplate {
                 continuousRun = false;
             else
                 continuousRun = true;
-            RandomClassifier rc = new RandomClassifier(ds, maxIteration, updateInterval, continuousRun, applicationTemplate);
-            Thread classifier = new Thread(rc);
-            classifier.start();
-            runBtn.setDisable(true);
+            if(continuousRun == true){
+                rc = new RandomClassifier(ds, maxIteration, updateInterval, continuousRun, applicationTemplate);
+                Thread classifier = new Thread(rc);
+                classifier.start();
+                runBtn.setDisable(true);
+                scrnshotButton.setDisable(true);
+                newButton.setDisable(true);
+                loadButton.setDisable(true);
+                toggle.setDisable(true);
+            }
+            else{
+                if(active == false){
+                rc = new RandomClassifier(ds, maxIteration, updateInterval, continuousRun, applicationTemplate);
+                    Thread classifier = new Thread(rc);
+                    active = true;
+                    classifier.start();
+                }
+                synchronized(rc){
+                    scrnshotButton.setDisable(true);
+                    newButton.setDisable(true);
+                    loadButton.setDisable(true);
+                    toggle.setDisable(true);
+                    rc.notify();
+                    runBtn.setDisable(true);
+                }
+            }
         });
     }
     public void activateChartAndGraph(){
@@ -376,6 +400,7 @@ public final class AppUI extends UITemplate {
                     showDetail(getLineCount(), "User Input of Text Area", dataComponent.getLabels());
                     showAlgorithmType();
                     activateChartAndGraph();
+                    active = false;
                 }
             }
             else{
@@ -436,5 +461,17 @@ public final class AppUI extends UITemplate {
     }
     public Button getRunButton(){
         return runBtn;
+    }
+    public void setActive(boolean a){
+        active =a;
+    }
+    public Button getLoadButton(){
+        return loadButton;
+    }
+    public Button getNewButton(){
+        return newButton;
+    }
+    public Button getToggleButton(){
+        return toggle;
     }
 }
