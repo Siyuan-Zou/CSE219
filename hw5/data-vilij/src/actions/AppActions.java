@@ -24,6 +24,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javax.imageio.ImageIO;
+import ui.WarningDialog;
 
 /**
  * This is the concrete implementation of the action handlers required by the application.
@@ -34,7 +35,8 @@ public final class AppActions implements ActionComponent {
 
     /** The application to which this class of actions belongs. */
     private ApplicationTemplate applicationTemplate;
-
+    private boolean hasInitialized;
+    private boolean hasNothing = true;
     /** Path to the data file currently active. */
     Path dataFilePath;
 
@@ -58,18 +60,7 @@ public final class AppActions implements ActionComponent {
         ui.showToggle();
         ui.getSaveButton().setDisable(false);
         ui.setActive(false);
-        
-        
-        
-//        try {
-//            if (!isUnsaved.get() || promptToSave()) {
-//                applicationTemplate.getDataComponent().clear();
-//                applicationTemplate.getUIComponent().clear();
-//                ((AppUI) applicationTemplate.getUIComponent()).getScreenShotButton().setDisable(true);
-//                isUnsaved.set(false);
-//                dataFilePath = null;
-//            }
-//        }catch (Exception e){}
+        hasNothing = false;
     }
 
     @Override
@@ -120,6 +111,7 @@ public final class AppActions implements ActionComponent {
                 ui.getSaveButton().setDisable(true);
                 ui.activateChartAndGraph();
                 ui.setActive(false);
+                hasNothing = false;
             }
         } catch (IOException ex){errorHandlingHelper();}
     }
@@ -127,10 +119,24 @@ public final class AppActions implements ActionComponent {
     @Override
     public void handleExitRequest() {
         try {
+            if(hasNothing){
+                System.exit(0);
+            }
+            
             if(((AppUI) applicationTemplate.getUIComponent()).getCurrentText() == null)
                 System.exit(0);
-            if (!isUnsaved.get() || promptToSave())
-                System.exit(0);
+            
+            if(((AppUI) applicationTemplate.getUIComponent()).getRunningState() == true){
+                if(exitWhileRunning()){
+                    System.exit(0);
+                }
+            }
+            
+            if(((AppUI) applicationTemplate.getUIComponent()).getRunningState() == false){
+                if (!isUnsaved.get() || promptToSave()){
+                        System.exit(0);
+                }
+            }
         } catch (IOException e) { errorHandlingHelper(); }
     }
 
@@ -161,7 +167,26 @@ public final class AppActions implements ActionComponent {
             }
         }
     }
-    
+    private boolean exitWhileRunning(){
+        AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
+        if(ui.getRunningState() == true){
+            WarningDialog dialog = WarningDialog.getDialog();
+            if(hasInitialized == false){
+                dialog.init(ui.getPrimaryWindow());
+                hasInitialized = true;
+            }
+            dialog.show("Exit While Running", "Do you want to exit while the alogorithm thread is still running?");
+            
+            if (dialog.getSelectedOption() == null){
+                return false;
+            }
+            
+            if (dialog.getSelectedOption().equals(WarningDialog.Option.EXIT)){
+                return true;
+            }
+        }
+        return false;
+    }
         
 
     /**
@@ -223,6 +248,7 @@ public final class AppActions implements ActionComponent {
     }
     private void load() throws IOException {
         applicationTemplate.getDataComponent().loadData(dataFilePath);
+        isUnsaved.set(false);
     }
 
     private void errorHandlingHelper() {

@@ -72,6 +72,7 @@ public final class AppUI extends UITemplate {
     private RandomClassifier rc;
     
     private boolean active = false;
+    private boolean running = false;
     
     private ArrayList<Integer> classifierConfigInputs;
 
@@ -126,7 +127,6 @@ public final class AppUI extends UITemplate {
     @Override
     public void initialize() {
         layout();
-        setWorkspaceActions();
     }
 
     @Override
@@ -318,16 +318,7 @@ public final class AppUI extends UITemplate {
     public void clearRunButton(){
         leftPanel.getChildren().remove(runBtn);
     }
-
-    private void setWorkspaceActions() {
-//        setTextAreaActions();
-//        setDisplayButtonActions();
-//        readOnly.selectedProperty().addListener(new ChangeListener<Boolean>(){
-//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
-//                textArea.setDisable(newValue);
-//            }
-//        });
-    }
+    
     private void setRunButtonActions(){
         runBtn.setOnAction(e-> {
             DataSet ds = new DataSet();
@@ -350,7 +341,7 @@ public final class AppUI extends UITemplate {
                 scrnshotButton.setDisable(true);
                 newButton.setDisable(true);
                 loadButton.setDisable(true);
-                toggle.setDisable(true);
+                running = true;
             }
             else{
                 if(active == false){
@@ -363,7 +354,7 @@ public final class AppUI extends UITemplate {
                     scrnshotButton.setDisable(true);
                     newButton.setDisable(true);
                     loadButton.setDisable(true);
-                    toggle.setDisable(true);
+                    running=true;
                     rc.notify();
                     runBtn.setDisable(true);
                 }
@@ -473,5 +464,11 @@ public final class AppUI extends UITemplate {
     }
     public Button getToggleButton(){
         return toggle;
+    }
+    public void setRunningState(boolean a){
+        running = a;
+    }
+    public boolean getRunningState(){
+        return running;
     }
 }

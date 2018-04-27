@@ -83,7 +83,7 @@ public class RandomClassifier extends Classifier {
                 ui.getScreenShotButton().setDisable(false);
                 ui.getNewButton().setDisable(false);
                 ui.getLoadButton().setDisable(false);
-                ui.getToggleButton().setDisable(false);
+                ui.setRunningState(false);
             }
             // everything below is just for internal viewing of how the output is changing
             // in the final project, such changes will be dynamically visible in the UI
@@ -99,7 +99,7 @@ public class RandomClassifier extends Classifier {
                 ui.getScreenShotButton().setDisable(false);
                 ui.getNewButton().setDisable(false);
                 ui.getLoadButton().setDisable(false);
-                ui.getToggleButton().setDisable(false);
+                ui.setRunningState(false);
                 break;
             }
         }
@@ -128,7 +128,6 @@ public class RandomClassifier extends Classifier {
                         ui.getScreenShotButton().setDisable(false);
                         ui.getNewButton().setDisable(false);
                         ui.getLoadButton().setDisable(false);
-                        ui.getToggleButton().setDisable(false);
                         this.wait();
                     } catch (InterruptedException ex) {}
                     
@@ -140,7 +139,7 @@ public class RandomClassifier extends Classifier {
                 ui.getScreenShotButton().setDisable(false);
                 ui.getNewButton().setDisable(false);
                 ui.getLoadButton().setDisable(false);
-                ui.getToggleButton().setDisable(false);
+                ui.setRunningState(false);
             }
             if (i > maxIterations * .6 && RAND.nextDouble() < 0.05) {
                 System.out.printf("Iteration number %d: ", i);
@@ -151,7 +150,7 @@ public class RandomClassifier extends Classifier {
                 ui.getScreenShotButton().setDisable(false);
                 ui.getNewButton().setDisable(false);
                 ui.getLoadButton().setDisable(false);
-                ui.getToggleButton().setDisable(false);
+                ui.setRunningState(false);
                 break;
             }
         }
