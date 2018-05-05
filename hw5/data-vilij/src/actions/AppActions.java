@@ -59,7 +59,7 @@ public final class AppActions implements ActionComponent {
         ui.getTextArea().setDisable(false);
         ui.showToggle();
         ui.getSaveButton().setDisable(false);
-        ui.setActive(false);
+        ui.setActive();
         hasNothing = false;
     }
 
@@ -110,7 +110,7 @@ public final class AppActions implements ActionComponent {
                 AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
                 ui.getSaveButton().setDisable(true);
                 ui.activateChartAndGraph();
-                ui.setActive(false);
+                ui.setActive();
                 hasNothing = false;
             }
         } catch (IOException ex){errorHandlingHelper();}

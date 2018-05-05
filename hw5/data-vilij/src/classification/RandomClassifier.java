@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import ui.AppUI;
 import vilij.templates.ApplicationTemplate;
@@ -135,7 +133,7 @@ public class RandomClassifier extends Classifier {
             }
             if(i == maxIterations){
                 ui.getRunButton().setDisable(false);
-                ui.setActive(false);
+                ui.setClassifierActive(false);
                 ui.getScreenShotButton().setDisable(false);
                 ui.getNewButton().setDisable(false);
                 ui.getLoadButton().setDisable(false);
@@ -146,7 +144,7 @@ public class RandomClassifier extends Classifier {
                 flush();
                 System.out.println("the 5 percent hit");
                 ui.getRunButton().setDisable(false);
-                ui.setActive(false);
+                ui.setClassifierActive(false);
                 ui.getScreenShotButton().setDisable(false);
                 ui.getNewButton().setDisable(false);
                 ui.getLoadButton().setDisable(false);

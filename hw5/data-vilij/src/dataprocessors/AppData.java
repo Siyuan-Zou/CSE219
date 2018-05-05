@@ -122,7 +122,6 @@ public class AppData implements DataComponent {
 
     public void displayData() {
         processor.toChartData(((AppUI) applicationTemplate.getUIComponent()).getChart());
-        processor.addTooltip(((AppUI) applicationTemplate.getUIComponent()).getChart());
     }
     public void displayLine(int a, int b, int c){
         PropertyManager manager = applicationTemplate.manager;
@@ -131,21 +130,9 @@ public class AppData implements DataComponent {
         ui.getChart().getData().remove(classifierLine);
         
         if(!((AppUI) applicationTemplate.getUIComponent()).getChart().getData().isEmpty()){
-            Map<String, Point2D> points = processor.getDataPoints();
-            double lowestX = Double.MAX_VALUE;
-            double highestX = Double. NEGATIVE_INFINITY;
-            double lowestY = Double.MAX_VALUE;
-            double highestY = Double. NEGATIVE_INFINITY;
-            for (Map.Entry<String, Point2D> entry : points.entrySet()) {
-                if(entry.getValue().getX() > highestX)
-                    highestX = entry.getValue().getX();
-                if(entry.getValue().getX() < lowestX)
-                    lowestX = entry.getValue().getX();
-                if(entry.getValue().getY() > highestY)
-                    highestY = entry.getValue().getY();
-                if(entry.getValue().getY() < lowestY)
-                    lowestY = entry.getValue().getY();
-            }
+            double lowestX = processor.getLowestX();
+            double highestX = processor.getHighestX();
+            
             classifierLine.setName(manager.getPropertyValue(AppPropertyTypes.CLASSIFIERLINE.name()));
             
             if(a==0){
@@ -167,6 +154,12 @@ public class AppData implements DataComponent {
             p2.getNode().setId(manager.getPropertyValue(AppPropertyTypes.POINT.name()));
             classifierLine.getNode().setId(manager.getPropertyValue(AppPropertyTypes.CLASSIFIERLINE.name()));
         }
+    }
+    public void changeLabels(Map<String, String> newLabels){
+        AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
+        ui.getChart().getData().clear();
+        processor.setLabels(newLabels);
+        processor.toChartData(ui.getChart());
     }
     public Map<String, String> getLabels(){
         return processor.getDataLabels();

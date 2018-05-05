@@ -45,15 +45,12 @@ public class ConfigWindow extends Stage implements Dialog{
     private VBox configPane;
     private Text error;
     
-    private HBox clusterPane;
-    
     private Label windowTitle = new Label();
     
     private ConfigWindow(){}
     
     public static ConfigWindow getDialog() {
-        if (configWindow == null)
-            configWindow = new ConfigWindow();
+        configWindow = new ConfigWindow();
         return configWindow;
     }
     
@@ -62,6 +59,9 @@ public class ConfigWindow extends Stage implements Dialog{
     }
     public ArrayList<Integer> getClassification(){
         return classification;
+    }
+    public ArrayList<Integer> getClustering(){
+        return clustering;
     }
     
     @Override
@@ -94,10 +94,12 @@ public class ConfigWindow extends Stage implements Dialog{
         updateIntervalPane.getChildren().addAll(updateIntervalT, updateIntervalField);
         HBox continuousRunPane = new HBox();
         continuousRunPane.getChildren().addAll(continuousRunT, continuousRunBox);
-        clusterPane = new HBox();
-        clusterPane.getChildren().addAll(clusterT, clusterField);
-        
-        configPane.getChildren().addAll(iterationPane, updateIntervalPane, clusterPane, continuousRunPane);
+        if(hideCluster == false){
+            HBox clusterPane = new HBox();
+            clusterPane.getChildren().addAll(clusterT, clusterField);
+            configPane.getChildren().addAll(iterationPane, updateIntervalPane, clusterPane, continuousRunPane);
+        }else
+            configPane.getChildren().addAll(iterationPane, updateIntervalPane, continuousRunPane);
         
         configPane.setPadding(new Insets(40, 60, 40, 60));
         configPane.setSpacing(20);
@@ -181,7 +183,6 @@ public class ConfigWindow extends Stage implements Dialog{
     }
     public void hideCluster(boolean a){
         hideCluster = a;
-        clusterPane.setVisible(!a);
     }
     private void showError(){
         error = new Text();
@@ -203,5 +204,15 @@ public class ConfigWindow extends Stage implements Dialog{
         clustering.add(1);
         clustering.add(0);
         clustering.add(1);
+    }
+    public void setClassification(ArrayList<Integer> classification){
+        if(!(classification == null))
+            if(!classification.isEmpty())
+                this.classification = classification;
+    }
+    public void setClustering(ArrayList<Integer> clustering){
+        if(!(clustering == null))
+            if(!clustering.isEmpty())
+                this.clustering = clustering;
     }
 }

@@ -2,6 +2,8 @@ package ui;
 
 import actions.AppActions;
 import classification.RandomClassifier;
+import clustering.KMeansClusterer;
+import clustering.RandomClusterer;
 import data.DataSet;
 import dataprocessors.AppData;
 import javafx.geometry.Insets;
@@ -31,8 +33,12 @@ import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import vilij.components.Dialog;
+import vilij.components.ErrorDialog;
+import vilij.settings.PropertyTypes;
 import static vilij.settings.PropertyTypes.GUI_RESOURCE_PATH;
 import static vilij.settings.PropertyTypes.ICONS_RESOURCE_PATH;
 
@@ -62,19 +68,32 @@ public final class AppUI extends UITemplate {
     private Button                       clustering;
     private Button                       runBtn;
     
-    private boolean                      hasInitialized;
     private boolean                      hasInitialClasConfig;
-    private boolean                      hasInitialClusConfig;
+    private boolean                      hasInitialRandomClusConfig;
+    private boolean                      hasInitialKMeansClusConfig;
     
-    private HBox clusteringPane;
+    private boolean randomClassifier;
+    private boolean randomClusterer;
+    private boolean kMeansClusterer;
+    
+    private HBox randomClusteringPane;
+    private HBox kMeansClusteringPane;
     private HBox classificationPane;
     
     private RandomClassifier rc;
+    private RandomClusterer rCluster;
+    private KMeansClusterer kCluster;
     
-    private boolean active = false;
+    private boolean classifierActive = false;
+    private boolean rClustererActive = false;
+    private boolean kClustererActive = false;
     private boolean running = false;
     
     private ArrayList<Integer> classifierConfigInputs;
+    private ArrayList<Integer> randomClustererConfigInputs;
+    private ArrayList<Integer> kMeansConfigInputs;
+    
+    private int countLabels;
 
     public LineChart<Number, Number> getChart() { return chart; }
 
@@ -142,6 +161,8 @@ public final class AppUI extends UITemplate {
         PropertyManager manager = applicationTemplate.manager;
         NumberAxis      xAxis   = new NumberAxis();
         NumberAxis      yAxis   = new NumberAxis();
+        xAxis.setForceZeroInRange(false);
+        yAxis.setForceZeroInRange(false);
         chart = new LineChart<>(xAxis, yAxis);
         chart.setTitle(manager.getPropertyValue(AppPropertyTypes.CHART_TITLE.name()));
         chart.getStylesheets().add(manager.getPropertyValue(AppPropertyTypes.CHART_STYLE_PATH.name()));
@@ -193,18 +214,19 @@ public final class AppUI extends UITemplate {
         PropertyManager manager = applicationTemplate.manager;
         hasTwoLabels = true;
         String s ="";
-        int countLabel = 0;
+        countLabels = 0;
         for (Map.Entry<String, String> entry : labels.entrySet()) {
-            if(!s.contains(entry.getValue())){
-                s+="-"+entry.getValue()+"\n";
-                if(!entry.getValue().equals("null"))
-                    countLabel++;
+            if(!entry.getValue().equals("null")){
+                if(!s.contains("-"+entry.getValue()+"\n")){
+                   s+="-"+entry.getValue()+"\n";
+                   countLabels++;
+                }
             }
         }
-        if(countLabel != 2)
+        if(countLabels != 2)
             hasTwoLabels = false;
         
-        dataDetail = new Text("There are "+lineCount + " instances with " + labels.size() + " label(s) loaded from: " +
+        dataDetail = new Text("There are "+lineCount + " instances with " + countLabels + " label(s) loaded from: " +
                 dataFilePath + "\n\n The Label(s) are: \n"+ s);
         String fontname       = manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLEFONT.name());
         Double fontsize       = Double.parseDouble(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLESIZE.name()))-3;
@@ -239,7 +261,7 @@ public final class AppUI extends UITemplate {
         classificationPane = new HBox();
         classificationPane.setSpacing(10);
         RadioButton rb1 = new RadioButton();
-        rb1.setText("Random Classification");
+        rb1.setText("RandomClassifier");
         
         String iconsPath = "/" + String.join(separator,
                                              manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
@@ -251,63 +273,110 @@ public final class AppUI extends UITemplate {
         classificationPane.getChildren().addAll(rb1, configBtn);
         leftPanel.getChildren().add(classificationPane);
         ConfigWindow classificationConfig  = ConfigWindow.getDialog();
-        if(hasInitialized == false){
-            classificationConfig.init(primaryStage);
-            hasInitialized = true;
-        }
         classificationConfig.hideCluster(true);
+        
+        classificationConfig.init(primaryStage);
+        classificationConfig.setClassification(classifierConfigInputs);
+        
+        showRunButton();
         configBtn.setOnMouseClicked(e-> {
             hasInitialClasConfig = true;
-            classificationConfig.show("Config Window", "Classification Config");
+            classificationConfig.show("Config Window", "RandomClassifier Config");
+            if(rb1.isSelected()){
+                runBtn.setVisible(true);
+            }
             classifierConfigInputs = classificationConfig.getClassification();
         });
-        showRunButton();
         rb1.selectedProperty().addListener(new ChangeListener<Boolean>(){
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
                 if(hasInitialClasConfig == true)
                     runBtn.setVisible(newValue);
+                randomClassifier = true;
+                randomClusterer = false;
+                kMeansClusterer = false;
             }
         });
     }
     public void showClusAlgorithm(){
         PropertyManager manager = applicationTemplate.manager;
         clearAlgorithmType();
-        clusteringPane = new HBox();
-        clusteringPane.setSpacing(10);
+        randomClusteringPane = new HBox();
+        randomClusteringPane.setSpacing(10);
+        kMeansClusteringPane = new HBox();
+        kMeansClusteringPane.setSpacing(10);
+        
+        final ToggleGroup group = new ToggleGroup();
         RadioButton rb1 = new RadioButton();
-        rb1.setText("Random Clustering");
+        rb1.setText("RandomClusterer");
+        rb1.setToggleGroup(group);
+        RadioButton rb2 = new RadioButton();
+        rb2.setText("KMeansClusterer");
+        rb2.setToggleGroup(group);
         
         String iconsPath = "/" + String.join(separator,
                                              manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
                                              manager.getPropertyValue(ICONS_RESOURCE_PATH.name()));
         
         Image configIcon = new Image(iconsPath+"/config.png", 20, 20, true, true);
-        ImageView configBtn = new ImageView(configIcon);
+        ImageView randomConfigBtn = new ImageView(configIcon);
+        ImageView kMeansConfigBtn = new ImageView(configIcon);
         
-        clusteringPane.getChildren().addAll(rb1, configBtn);
-        leftPanel.getChildren().add(clusteringPane);
+        randomClusteringPane.getChildren().addAll(rb1, randomConfigBtn);
+        kMeansClusteringPane.getChildren().addAll(rb2, kMeansConfigBtn);
+        leftPanel.getChildren().addAll(randomClusteringPane, kMeansClusteringPane);
         
-        ConfigWindow clusterConfig = ConfigWindow.getDialog();
-        if(hasInitialized == false){
-            clusterConfig.init(primaryStage);
-            hasInitialized = true;
-        }
-        clusterConfig.hideCluster(false);
-        configBtn.setOnMouseClicked(e-> {
-            hasInitialClusConfig = true;
-            clusterConfig.show("Config Window", "Clustering Config");
-        });
+        ConfigWindow randomClusterConfig = ConfigWindow.getDialog();
+        ConfigWindow kMeansClusterConfig = ConfigWindow.getDialog();
+        
+        randomClusterConfig.hideCluster(false);
+        kMeansClusterConfig.hideCluster(false);
+        
+        randomClusterConfig.init(primaryStage);
+        randomClusterConfig.setClustering(randomClustererConfigInputs);
+        kMeansClusterConfig.init(primaryStage);
+        kMeansClusterConfig.setClustering(kMeansConfigInputs);
+        
         showRunButton();
+        
+        randomConfigBtn.setOnMouseClicked(e-> {
+            hasInitialRandomClusConfig = true;
+            randomClusterConfig.show("Config Window", "RandomClusterer Config");
+            if(rb1.isSelected()){
+                runBtn.setVisible(true);
+            }
+            randomClustererConfigInputs = randomClusterConfig.getClustering();
+        });
+        kMeansConfigBtn.setOnMouseClicked(e-> {
+            hasInitialKMeansClusConfig = true;
+            kMeansClusterConfig.show("Config Window", "KmeansClusterer Config");
+            if(rb2.isSelected()){
+                runBtn.setVisible(true);
+            }
+            kMeansConfigInputs = kMeansClusterConfig.getClustering();
+        });
+        
         rb1.selectedProperty().addListener(new ChangeListener<Boolean>(){
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
-                if(hasInitialClusConfig == true)
+                if(hasInitialRandomClusConfig == true)
                     runBtn.setVisible(newValue);
+                randomClassifier = false;
+                randomClusterer = true;
+                kMeansClusterer = false;
+            }
+        });
+        rb2.selectedProperty().addListener(new ChangeListener<Boolean>(){
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
+                if(hasInitialKMeansClusConfig == true)
+                    runBtn.setVisible(newValue);
+                randomClassifier = false;
+                randomClusterer = false;
+                kMeansClusterer = true;
             }
         });
     }
     public void clearAlgorithm(){
         leftPanel.getChildren().remove(classificationPane);
-        leftPanel.getChildren().remove(clusteringPane);
+        leftPanel.getChildren().removeAll(randomClusteringPane, kMeansClusteringPane);
     }
     public void showRunButton(){
         runBtn = new Button("Run");
@@ -326,37 +395,127 @@ public final class AppUI extends UITemplate {
             ds.setLocations(dataComponent.getDataPoints());
             ds.setLabels(dataComponent.getLabels());
             
-            int maxIteration = classifierConfigInputs.get(0);
-            int updateInterval = classifierConfigInputs.get(1);
-            boolean continuousRun;
-            if(classifierConfigInputs.get(2) == 0)
-                continuousRun = false;
-            else
-                continuousRun = true;
-            if(continuousRun == true){
-                rc = new RandomClassifier(ds, maxIteration, updateInterval, continuousRun, applicationTemplate);
-                Thread classifier = new Thread(rc);
-                classifier.start();
-                runBtn.setDisable(true);
-                scrnshotButton.setDisable(true);
-                newButton.setDisable(true);
-                loadButton.setDisable(true);
-                running = true;
-            }
-            else{
-                if(active == false){
-                rc = new RandomClassifier(ds, maxIteration, updateInterval, continuousRun, applicationTemplate);
+            if(randomClassifier == true){
+                chart.setAnimated(false);
+                int maxIteration = classifierConfigInputs.get(0);
+                int updateInterval = classifierConfigInputs.get(1);
+                boolean continuousRun;
+                if(classifierConfigInputs.get(2) == 0)
+                    continuousRun = false;
+                else
+                    continuousRun = true;
+                if(continuousRun == true){
+                    rc = new RandomClassifier(ds, maxIteration, updateInterval, continuousRun, applicationTemplate);
                     Thread classifier = new Thread(rc);
-                    active = true;
                     classifier.start();
-                }
-                synchronized(rc){
+                    runBtn.setDisable(true);
                     scrnshotButton.setDisable(true);
                     newButton.setDisable(true);
                     loadButton.setDisable(true);
-                    running=true;
-                    rc.notify();
+                    running = true;
+                }
+                else{
+                    if(classifierActive == false){
+                        rc = new RandomClassifier(ds, maxIteration, updateInterval, continuousRun, applicationTemplate);
+                        Thread classifier = new Thread(rc);
+                        classifierActive = true;
+                        classifier.start();
+                    }
+                    synchronized(rc){
+                        scrnshotButton.setDisable(true);
+                        newButton.setDisable(true);
+                        loadButton.setDisable(true);
+                        running=true;
+                        rc.notify();
+                        runBtn.setDisable(true);
+                    }
+                }
+            }else if(randomClusterer == true){
+                chart.setAnimated(true);
+                int maxIteration = randomClustererConfigInputs.get(0);
+                int updateInterval = randomClustererConfigInputs.get(1);
+                boolean continuousRun;
+                if(randomClustererConfigInputs.get(2) == 0)
+                    continuousRun = false;
+                else
+                    continuousRun = true;
+                int clusters = randomClustererConfigInputs.get(3);
+                if(clusters > countLabels){
+                    clusters = countLabels;
+                    randomClustererConfigInputs.set(3, countLabels);
+                    ErrorDialog edialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+                    edialog.show("Warning Dialog", 
+                                "The amount of cluster enter is greater than the amount of labels in data, "
+                                        + "the application has set the cluster to the amount of labels in the data.");
+                }
+                if(continuousRun == true){
+                    rCluster = new RandomClusterer(ds, maxIteration, updateInterval, continuousRun, clusters, applicationTemplate);
+                    Thread randomClusterer = new Thread(rCluster);
+                    randomClusterer.start();
                     runBtn.setDisable(true);
+                    scrnshotButton.setDisable(true);
+                    newButton.setDisable(true);
+                    loadButton.setDisable(true);
+                    running = true;
+                }else{
+                    if(rClustererActive == false){
+                        rCluster = new RandomClusterer(ds, maxIteration, updateInterval, continuousRun, clusters, applicationTemplate);
+                        Thread randomClusterer = new Thread(rCluster);
+                        rClustererActive = true;
+                        randomClusterer.start();
+                    }
+                    synchronized(rCluster){
+                        scrnshotButton.setDisable(true);
+                        newButton.setDisable(true);
+                        loadButton.setDisable(true);
+                        running=true;
+                        rCluster.notify();
+                        runBtn.setDisable(true);
+                    }
+                }
+            }else if(kMeansClusterer == true){
+                chart.setAnimated(true);
+                int maxIteration = kMeansConfigInputs.get(0);
+                int updateInterval = kMeansConfigInputs.get(1);
+                boolean continuousRun;
+                if(kMeansConfigInputs.get(2) == 0)
+                    continuousRun = false;
+                else
+                    continuousRun = true;
+                int clusters = kMeansConfigInputs.get(3);
+                if(clusters > countLabels){
+                    clusters = countLabels;
+                    kMeansConfigInputs.set(3, countLabels);
+                    ErrorDialog edialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+                    edialog.show("Warning Dialog", 
+                                "The amount of cluster enter is greater than the amount of labels in data, "
+                                        + "the application has set the cluster to the amount of labels in the data.");
+                }
+                if(continuousRun == true){
+                    kCluster = new KMeansClusterer(ds, maxIteration, updateInterval, continuousRun, clusters, applicationTemplate);
+                    Thread kMeans = new Thread(kCluster);
+                    kMeans.start();
+                    runBtn.setDisable(true);
+                    scrnshotButton.setDisable(true);
+                    newButton.setDisable(true);
+                    loadButton.setDisable(true);
+                    running = true;
+                }else{
+                    if(kClustererActive == false){
+                        System.out.println("hi");
+                        kCluster = new KMeansClusterer(ds, maxIteration, updateInterval, continuousRun, clusters, applicationTemplate);
+                        Thread kMeans = new Thread(kCluster);
+                        kClustererActive = true;
+                        kMeans.start();
+                    }
+                    synchronized(kCluster){
+                        scrnshotButton.setDisable(true);
+                        newButton.setDisable(true);
+                        loadButton.setDisable(true);
+                        running=true;
+                        kCluster.notify();
+                        runBtn.setDisable(true);
+                    }
                 }
             }
         });
@@ -366,7 +525,6 @@ public final class AppUI extends UITemplate {
         chart.setVerticalZeroLineVisible(true);
         chart.getXAxis().setOpacity(100);
         chart.getYAxis().setOpacity(100);
-        chart.setAnimated(false);
         try {
             chart.getData().clear();
             AppData dataComponent = (AppData) applicationTemplate.getDataComponent();
@@ -391,7 +549,9 @@ public final class AppUI extends UITemplate {
                     showDetail(getLineCount(), "User Input of Text Area", dataComponent.getLabels());
                     showAlgorithmType();
                     activateChartAndGraph();
-                    active = false;
+                    classifierActive = false;
+                    rClustererActive = false;
+                    kClustererActive = false;
                 }
             }
             else{
@@ -453,8 +613,19 @@ public final class AppUI extends UITemplate {
     public Button getRunButton(){
         return runBtn;
     }
-    public void setActive(boolean a){
-        active =a;
+    public void setActive(){
+        classifierActive = false;
+        rClustererActive = false;
+        kClustererActive = false;
+    }
+    public void setClassifierActive(boolean a){
+        classifierActive = a;
+    }
+    public void setRClustererActive(boolean a){
+        rClustererActive = a;
+    }
+    public void setKClustererActive(boolean a){
+        kClustererActive = a;
     }
     public Button getLoadButton(){
         return loadButton;

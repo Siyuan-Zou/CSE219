@@ -44,6 +44,11 @@ public final class TSDProcessor {
     private ArrayList<Integer> errorLines = new ArrayList<Integer>();
     private int dupeLine = -1;
     private String dupeName;
+    
+    private double lowestX;
+    private double highestX;
+    private double lowestY;
+    private double highestY;
 
     public TSDProcessor() {
         dataLabels = new HashMap<>();
@@ -103,6 +108,7 @@ public final class TSDProcessor {
             });
             chart.getData().add(series);
         }
+        setLowAndHighBound();
     }
 
     void clear() {
@@ -124,21 +130,6 @@ public final class TSDProcessor {
     public Map<String, String> getDataLabels(){
         return dataLabels;
     }
-    public void addTooltip(XYChart<Number, Number>chart){
-        for(XYChart.Series<Number, Number> s : chart.getData()){
-            for(XYChart.Data d : s.getData()){
-                Tooltip.install(d.getNode(), new Tooltip(s.getName()));
-                
-                d.getNode().setOnMouseEntered(e -> {
-                    d.getNode().setCursor(Cursor.CROSSHAIR);
-                });
-                
-                d.getNode().setOnMouseExited(e -> {
-                    d.getNode().setCursor(Cursor.DEFAULT);  
-                });
-            }
-        }
-    }
     public boolean checkDupe(String name){
         for (Map.Entry<String, String> entry : dataLabels.entrySet()) {
             if (name.equals(entry.getKey())){
@@ -155,5 +146,38 @@ public final class TSDProcessor {
     }
     public String getDupeName(){
         return dupeName;
+    }
+    public void setLowAndHighBound(){
+        if(!dataPoints.isEmpty()){
+            lowestX = Double.MAX_VALUE;
+            highestX = Double. NEGATIVE_INFINITY;
+            lowestY = Double.MAX_VALUE;
+            highestY = Double. NEGATIVE_INFINITY;
+            for (Map.Entry<String, Point2D> entry : dataPoints.entrySet()) {
+                if(entry.getValue().getX() > highestX)
+                    highestX = entry.getValue().getX();
+                if(entry.getValue().getX() < lowestX)
+                    lowestX = entry.getValue().getX();
+                if(entry.getValue().getY() > highestY)
+                    highestY = entry.getValue().getY();
+                if(entry.getValue().getY() < lowestY)
+                    lowestY = entry.getValue().getY();
+            }
+        }
+    }
+    public double getLowestX(){
+        return lowestX;
+    }
+    public double getHighestX(){
+        return highestX;
+    }
+    public double getLowestY(){
+        return lowestY;
+    }
+    public double getHighestY(){
+        return highestY;
+    }
+    public void setLabels(Map<String, String> newLabels){
+        dataLabels = newLabels;
     }
 }
