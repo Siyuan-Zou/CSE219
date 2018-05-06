@@ -57,6 +57,8 @@ public class RandomClusterer extends Clusterer {
                     Thread.sleep(1000);
                 } catch (InterruptedException ex) {}
                 Platform.runLater(() -> data.changeLabels(dataset.getLabels()));
+                
+                System.out.println("this is " + iteration + " iteration");
             }
             if(iteration == maxIterations){
                 ui.getRunButton().setDisable(false);
@@ -79,7 +81,7 @@ public class RandomClusterer extends Clusterer {
                     ui.getRunButton().setDisable(false);
                     data.changeLabels(dataset.getLabels());
                 });
-                System.out.println("this is" + iteration + "iteration");
+                System.out.println("this is " + iteration + " iteration");
                 synchronized(this){
                     try {
                         ui.getScreenShotButton().setDisable(false);

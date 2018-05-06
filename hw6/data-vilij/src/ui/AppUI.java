@@ -1,11 +1,12 @@
 package ui;
 
 import actions.AppActions;
-import classification.RandomClassifier;
-import clustering.KMeansClusterer;
-import clustering.RandomClusterer;
+import algorithms.Algorithm;
+import algorithms.Classifier;
+import algorithms.Clusterer;
 import data.DataSet;
 import dataprocessors.AppData;
+import java.io.File;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.chart.NumberAxis;
@@ -26,6 +27,7 @@ import vilij.templates.UITemplate;
 
 import static java.io.File.separator;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
@@ -79,10 +81,6 @@ public final class AppUI extends UITemplate {
     private HBox kMeansClusteringPane;
     private HBox classificationPane;
     
-    private RandomClassifier rc;
-    private RandomClusterer rCluster;
-    private KMeansClusterer kCluster;
-    
     private boolean classifierActive = false;
     private boolean rClustererActive = false;
     private boolean kClustererActive = false;
@@ -93,6 +91,8 @@ public final class AppUI extends UITemplate {
     private ArrayList<Integer> kMeansConfigInputs;
     
     private int countLabels;
+    
+    private ArrayList<String> algorithmNames = new ArrayList<String>();
 
     public LineChart<Number, Number> getChart() { return chart; }
 
@@ -155,8 +155,26 @@ public final class AppUI extends UITemplate {
     }
 
     public String getCurrentText() { return textArea.getText()+hidden.getText(); }
+    
+    public void getAlgorithmsFiles(){
+        File folder = new File("data-vilij/src/classification");
+        File[] listOfFiles = folder.listFiles();
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile()) {
+                algorithmNames.add("classification." + listOfFiles[i].getName().replaceAll(".java", ""));
+            }
+        }
+        File folder2 = new File("data-vilij/src/clustering");
+        File[] listOfFiles2 = folder2.listFiles();
+        for (int i = 0; i < listOfFiles2.length; i++) {
+            if (listOfFiles2[i].isFile()) {
+                algorithmNames.add("clustering." + listOfFiles2[i].getName().replaceAll(".java", ""));
+            }
+        }
+    }
 
     private void layout() {
+        getAlgorithmsFiles();
         PropertyManager manager = applicationTemplate.manager;
         NumberAxis      xAxis   = new NumberAxis();
         NumberAxis      yAxis   = new NumberAxis();
@@ -185,7 +203,28 @@ public final class AppUI extends UITemplate {
         
         appPane.getChildren().add(workspace);
         VBox.setVgrow(appPane, Priority.ALWAYS);
+        
+        setInitialConfig();
     }
+    private void setInitialConfig(){
+        classifierConfigInputs = new ArrayList<Integer>();
+        classifierConfigInputs.add(1);
+        classifierConfigInputs.add(1);
+        classifierConfigInputs.add(0);
+        
+        randomClustererConfigInputs = new ArrayList<Integer>();
+        randomClustererConfigInputs.add(1);
+        randomClustererConfigInputs.add(1);
+        randomClustererConfigInputs.add(0);
+        randomClustererConfigInputs.add(1);
+        
+        kMeansConfigInputs = new ArrayList<Integer>();
+        kMeansConfigInputs.add(1);
+        kMeansConfigInputs.add(1);
+        kMeansConfigInputs.add(0);
+        kMeansConfigInputs.add(1);
+    }
+    
     public void showData(){
         PropertyManager manager = applicationTemplate.manager;
         saveButton.setDisable(true);
@@ -278,11 +317,17 @@ public final class AppUI extends UITemplate {
         classificationConfig.setClassification(classifierConfigInputs);
         
         showRunButton();
+        
         configBtn.setOnMouseClicked(e-> {
             hasInitialClasConfig = true;
             classificationConfig.show("Config Window", "RandomClassifier Config");
             if(rb1.isSelected()){
                 runBtn.setVisible(true);
+                try {
+                    setRunButtonActions();
+                } catch (Exception ex) {
+                    Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             classifierConfigInputs = classificationConfig.getClassification();
         });
@@ -290,6 +335,11 @@ public final class AppUI extends UITemplate {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
                 if(hasInitialClasConfig == true)
                     runBtn.setVisible(newValue);
+                try {
+                    setRunButtonActions();
+                } catch (Exception ex) {
+                    Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 randomClassifier = true;
                 randomClusterer = false;
                 kMeansClusterer = false;
@@ -342,6 +392,11 @@ public final class AppUI extends UITemplate {
             randomClusterConfig.show("Config Window", "RandomClusterer Config");
             if(rb1.isSelected()){
                 runBtn.setVisible(true);
+                try {
+                    setRunButtonActions();
+                } catch (Exception ex) {
+                    Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             randomClustererConfigInputs = randomClusterConfig.getClustering();
         });
@@ -350,6 +405,11 @@ public final class AppUI extends UITemplate {
             kMeansClusterConfig.show("Config Window", "KmeansClusterer Config");
             if(rb2.isSelected()){
                 runBtn.setVisible(true);
+                try {
+                    setRunButtonActions();
+                } catch (Exception ex) {
+                    Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             kMeansConfigInputs = kMeansClusterConfig.getClustering();
         });
@@ -358,6 +418,11 @@ public final class AppUI extends UITemplate {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
                 if(hasInitialRandomClusConfig == true)
                     runBtn.setVisible(newValue);
+                try {
+                    setRunButtonActions();
+                } catch (Exception ex) {
+                    Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 randomClassifier = false;
                 randomClusterer = true;
                 kMeansClusterer = false;
@@ -367,6 +432,11 @@ public final class AppUI extends UITemplate {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue){
                 if(hasInitialKMeansClusConfig == true)
                     runBtn.setVisible(newValue);
+                try {
+                    setRunButtonActions();
+                } catch (Exception ex) {
+                    Logger.getLogger(AppUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 randomClassifier = false;
                 randomClusterer = false;
                 kMeansClusterer = true;
@@ -381,30 +451,87 @@ public final class AppUI extends UITemplate {
         runBtn = new Button("Run");
         runBtn.setVisible(false);
         leftPanel.getChildren().add(runBtn);
-        setRunButtonActions();
     }
     public void clearRunButton(){
         leftPanel.getChildren().remove(runBtn);
     }
     
-    private void setRunButtonActions(){
+    private void setRunButtonActions() throws Exception{
+        DataSet ds = new DataSet();
+        AppData dataComponent = (AppData) applicationTemplate.getDataComponent();
+        ds.setLocations(dataComponent.getDataPoints());
+        ds.setLabels(dataComponent.getLabels());
+        
+        int maxIterationClassifier = classifierConfigInputs.get(0);
+        int updateIntervalClassifier = classifierConfigInputs.get(1);
+        boolean continuousRunClassifier;
+        if(classifierConfigInputs.get(2) == 0)
+            continuousRunClassifier = false;
+        else
+            continuousRunClassifier = true;
+
+        Class randClassifier = Class.forName(algorithmNames.get(0));
+        Constructor randclassifierCons = randClassifier.getConstructor(DataSet.class, int.class, int.class, boolean.class, ApplicationTemplate.class);
+        Classifier rc = (Classifier) randclassifierCons.newInstance(ds, 
+                                                                  maxIterationClassifier, 
+                                                                  updateIntervalClassifier, 
+                                                                  continuousRunClassifier, 
+                                                                  applicationTemplate);
+        
+        int maxIterationRClusterer = randomClustererConfigInputs.get(0);
+        int updateIntervalRClusterer = randomClustererConfigInputs.get(1);
+        boolean continuousRunRClusterer;
+        if(randomClustererConfigInputs.get(2) == 0)
+            continuousRunRClusterer = false;
+        else
+            continuousRunRClusterer = true;
+        int rClusters = randomClustererConfigInputs.get(3);
+        if(rClusters > countLabels){
+            rClusters = countLabels;
+            randomClustererConfigInputs.set(3, countLabels);
+            ErrorDialog edialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+            edialog.show("Warning Dialog", 
+                                "The amount of cluster enter is greater than the amount of labels in data, "
+                                        + "the application has set the cluster to the amount of labels in the data.");
+        }
+        Class randClusterer = Class.forName(algorithmNames.get(2));
+        Constructor randClustererCons = randClusterer.getConstructor(DataSet.class, int.class, int.class, boolean.class, int.class, ApplicationTemplate.class);
+        Clusterer rCluster = (Clusterer) randClustererCons.newInstance(ds, 
+                                                                       maxIterationRClusterer, 
+                                                                       updateIntervalRClusterer, 
+                                                                       continuousRunRClusterer, 
+                                                                       rClusters, 
+                                                                       applicationTemplate);
+        
+        int maxIteration = kMeansConfigInputs.get(0);
+        int updateInterval = kMeansConfigInputs.get(1);
+        boolean continuousRun;
+        if(kMeansConfigInputs.get(2) == 0)
+            continuousRun = false;
+        else
+            continuousRun = true;
+        int clusters = kMeansConfigInputs.get(3);
+        if(clusters > countLabels){
+            clusters = countLabels;
+            kMeansConfigInputs.set(3, countLabels);
+            ErrorDialog edialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+            edialog.show("Warning Dialog", 
+                                "The amount of cluster enter is greater than the amount of labels in data, "
+                                        + "the application has set the cluster to the amount of labels in the data.");
+        }
+        Class kClusterer = Class.forName(algorithmNames.get(1));
+        Constructor kClustererCons = kClusterer.getConstructor(DataSet.class, int.class, int.class, boolean.class, int.class, ApplicationTemplate.class);
+        Clusterer kCluster = (Clusterer) kClustererCons.newInstance(ds, 
+                                                                    maxIteration, 
+                                                                    updateInterval, 
+                                                                    continuousRun, 
+                                                                    clusters, 
+                                                                    applicationTemplate);
+
         runBtn.setOnAction(e-> {
-            DataSet ds = new DataSet();
-            AppData dataComponent = (AppData) applicationTemplate.getDataComponent();
-            ds.setLocations(dataComponent.getDataPoints());
-            ds.setLabels(dataComponent.getLabels());
-            
             if(randomClassifier == true){
                 chart.setAnimated(false);
-                int maxIteration = classifierConfigInputs.get(0);
-                int updateInterval = classifierConfigInputs.get(1);
-                boolean continuousRun;
-                if(classifierConfigInputs.get(2) == 0)
-                    continuousRun = false;
-                else
-                    continuousRun = true;
-                if(continuousRun == true){
-                    rc = new RandomClassifier(ds, maxIteration, updateInterval, continuousRun, applicationTemplate);
+                if(continuousRunClassifier == true){
                     Thread classifier = new Thread(rc);
                     classifier.start();
                     runBtn.setDisable(true);
@@ -415,7 +542,6 @@ public final class AppUI extends UITemplate {
                 }
                 else{
                     if(classifierActive == false){
-                        rc = new RandomClassifier(ds, maxIteration, updateInterval, continuousRun, applicationTemplate);
                         Thread classifier = new Thread(rc);
                         classifierActive = true;
                         classifier.start();
@@ -431,24 +557,7 @@ public final class AppUI extends UITemplate {
                 }
             }else if(randomClusterer == true){
                 chart.setAnimated(true);
-                int maxIteration = randomClustererConfigInputs.get(0);
-                int updateInterval = randomClustererConfigInputs.get(1);
-                boolean continuousRun;
-                if(randomClustererConfigInputs.get(2) == 0)
-                    continuousRun = false;
-                else
-                    continuousRun = true;
-                int clusters = randomClustererConfigInputs.get(3);
-                if(clusters > countLabels){
-                    clusters = countLabels;
-                    randomClustererConfigInputs.set(3, countLabels);
-                    ErrorDialog edialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
-                    edialog.show("Warning Dialog", 
-                                "The amount of cluster enter is greater than the amount of labels in data, "
-                                        + "the application has set the cluster to the amount of labels in the data.");
-                }
-                if(continuousRun == true){
-                    rCluster = new RandomClusterer(ds, maxIteration, updateInterval, continuousRun, clusters, applicationTemplate);
+                if(continuousRunRClusterer == true){
                     Thread randomClusterer = new Thread(rCluster);
                     randomClusterer.start();
                     runBtn.setDisable(true);
@@ -458,7 +567,6 @@ public final class AppUI extends UITemplate {
                     running = true;
                 }else{
                     if(rClustererActive == false){
-                        rCluster = new RandomClusterer(ds, maxIteration, updateInterval, continuousRun, clusters, applicationTemplate);
                         Thread randomClusterer = new Thread(rCluster);
                         rClustererActive = true;
                         randomClusterer.start();
@@ -474,24 +582,7 @@ public final class AppUI extends UITemplate {
                 }
             }else if(kMeansClusterer == true){
                 chart.setAnimated(true);
-                int maxIteration = kMeansConfigInputs.get(0);
-                int updateInterval = kMeansConfigInputs.get(1);
-                boolean continuousRun;
-                if(kMeansConfigInputs.get(2) == 0)
-                    continuousRun = false;
-                else
-                    continuousRun = true;
-                int clusters = kMeansConfigInputs.get(3);
-                if(clusters > countLabels){
-                    clusters = countLabels;
-                    kMeansConfigInputs.set(3, countLabels);
-                    ErrorDialog edialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
-                    edialog.show("Warning Dialog", 
-                                "The amount of cluster enter is greater than the amount of labels in data, "
-                                        + "the application has set the cluster to the amount of labels in the data.");
-                }
                 if(continuousRun == true){
-                    kCluster = new KMeansClusterer(ds, maxIteration, updateInterval, continuousRun, clusters, applicationTemplate);
                     Thread kMeans = new Thread(kCluster);
                     kMeans.start();
                     runBtn.setDisable(true);
@@ -501,8 +592,6 @@ public final class AppUI extends UITemplate {
                     running = true;
                 }else{
                     if(kClustererActive == false){
-                        System.out.println("hi");
-                        kCluster = new KMeansClusterer(ds, maxIteration, updateInterval, continuousRun, clusters, applicationTemplate);
                         Thread kMeans = new Thread(kCluster);
                         kClustererActive = true;
                         kMeans.start();
